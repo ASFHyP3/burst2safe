@@ -16,7 +16,7 @@ name = "burst2safe"
 requires-python = ">=3.9"
 dynamic = ["version"]
 authors = [
-    {name="Forrest Williams", email="ffwilliams2@alaska.edu"},
+    {name="tools-bot", email="UAF-asf-apd@alaska.edu"},
 ]
 description = "A package for converting ASF-derived Sentinel-1 burst SLC products to the ESA SAFE format"
 readme = "README.md"
@@ -40,8 +40,8 @@ dependencies = [
 ]
 
 [project.urls]
-Homepage = "https://github.com/forrestfwilliams/burst2safe"
-"Bug Tracker" ="https://github.com/forrestfwilliams/burst2safe/issues"
+Homepage = "https://github.com/ASFHyP3/burst2safe"
+"Bug Tracker" ="https://github.com/ASFHyP3/burst2safe/issues"
 
 [project.scripts]
 burst2safe = "burst2safe.burst2safe:main"

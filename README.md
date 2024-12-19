@@ -12,7 +12,7 @@ Here is the current compatibility status of `burst2safe` with the major Sentinel
 | [SNAP](https://step.esa.int/main/toolboxes/snap/)                      | Untested   | N/A            | Unknown        |
 | [GMTSAR](https://step.esa.int/main/toolboxes/snap/)                    | Untested   | N/A            | Unknown        |
 
-If you would like to see compatibility for a processor listed as "Untested", or not listed at all, added please [open an issue](https://github.com/forrestfwilliams/burst2safe/issues/new)!
+If you would like to see compatibility for a processor listed as "Untested", or not listed at all, added please [open an issue](https://github.com/ASFHyP3/burst2safe/issues/new)!
 
 ## Setup
 ### Installation
@@ -136,17 +136,17 @@ A full accounting of omitted datasets and differing fields can be found below:
     * The SAFE report PDF is omitted.
 
 ### IPF Version Compatibility
-At this time, we are not aware of any compatibility issues with older Sentinel-1 Instrument Processing Facility (IPF) versions. However, if you do encounter any incompatibilities [please open an issue](https://github.com/forrestfwilliams/burst2safe/issues/new), so we can fix it!
+At this time, we are not aware of any compatibility issues with older Sentinel-1 Instrument Processing Facility (IPF) versions. However, if you do encounter any incompatibilities [please open an issue](https://github.com/ASFHyP3/burst2safe/issues/new), so we can fix it!
 
 ## Developer Setup
 1. Ensure that conda is installed on your system (we recommend using [mambaforge](https://github.com/conda-forge/miniforge#mambaforge) to reduce setup times).
-2. Download a local version of the `burst2safe` repository (`git clone https://github.com/forrestfwilliams/burst2safe.git`)
+2. Download a local version of the `burst2safe` repository (`git clone https://github.com/ASFHyP3/burst2safe.git`)
 3. In the base directory for this project call `mamba env create -f environment.yml` to create your Python environment, then activate it (`mamba activate burst2safe`)
 4. Finally, install a development version of the package (`python -m pip install -e .`)
 
 To run all commands in sequence use:
 ```bash
-git clone https://github.com/forrestfwilliams/burst2safe.git
+git clone https://github.com/ASFHyP3/burst2safe.git
 cd burst2safe
 mamba env create -f environment.yml
 mamba activate burst2safe
@@ -163,7 +163,7 @@ Contributions this project are welcome! If you would like to contribute, please 
 Want to talk about `burst2safe`? We would love to hear from you!
 
 Found a bug? Want to request a feature?
-[open an issue](https://github.com/forrestfwilliams/burst2safe/issues/new)
+[open an issue](https://github.com/ASFHyP3/burst2safe/issues/new)
 
 General questions? Suggestions? Or just want to talk to the team?
-[chat with us on burst2safe's discussion page](https://github.com/forrestfwilliams/burst2safe/discussions)
+[chat with us on burst2safe's discussion page](https://github.com/ASFHyP3/burst2safe/discussions)
