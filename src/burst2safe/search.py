@@ -3,7 +3,7 @@ from collections.abc import Iterable
 from datetime import datetime
 from itertools import product
 from pathlib import Path
-from typing import List, Optional
+from typing import Dict, List, Optional, Tuple
 
 import asf_search
 import numpy as np
@@ -108,6 +108,74 @@ def get_burst_group(
     return search_results
 
 
+def sanitize_group_search_inputs(
+    polarizations: Optional[Iterable] = None, swaths: Optional[Iterable] = None, mode: str = 'IW'
+) -> Tuple[List[str], List[str]]:
+    """Sanitize inputs for group search.
+
+    Args:
+        polarizations: List of polarizations to include (default: VV)
+        swaths: List of swaths to include (default: all)
+        mode: The collection mode to use (IW or EW) (default: IW)
+
+    Returns:
+        A tuple of sanitized polarizations and swaths
+    """
+    if polarizations is None:
+        polarizations = ['VV']
+    bad_pols = set(polarizations) - set(['VV', 'VH', 'HV', 'HH'])
+    if bad_pols:
+        raise ValueError(f'Invalid polarizations: {" ".join(bad_pols)}')
+
+    if mode not in ['IW', 'EW']:
+        raise ValueError('Invalid mode: must be IW or EW')
+    elif mode == 'IW':
+        valid_swaths = ['IW1', 'IW2', 'IW3']
+    elif mode == 'EW':
+        valid_swaths = ['EW1', 'EW2', 'EW3', 'EW4', 'EW5']
+
+    if swaths is None:
+        swaths = [None]
+    else:
+        bad_swaths = set(swaths) - set(valid_swaths)
+        if bad_swaths:
+            raise ValueError(f'Invalid swaths: {" ".join(bad_swaths)}')
+
+    return polarizations, swaths
+
+
+def add_missing_bursts(
+    search_results: List[S1BurstProduct],
+    polarizations: List[str],
+    swaths: List[str],
+    min_bursts: int,
+    use_relative_orbit: bool,
+) -> List[S1BurstProduct]:
+    """Add missing bursts to the search results to ensure each swath/pol combo has at least `min_bursts` bursts.
+
+    Args:
+        search_results: A list of S1BurstProduct objects
+        polarizations: List of polarizations to include
+        swaths: List of swaths to include
+        min_bursts: The minimum number of bursts per swath (default: 1)
+        use_relative_orbit: Use relative orbit number instead of absolute orbit number (default: False)
+
+    Returns:
+        A list of S1BurstProduct objects
+    """
+    grouped_results = []
+    if use_relative_orbit:
+        absolute_orbits = list(set([int(result.properties['orbit']) for result in search_results]))
+        group_definitions = product(polarizations, swaths, absolute_orbits)
+    else:
+        group_definitions = product(polarizations, swaths)
+
+    for group_definition in group_definitions:
+        sub_results = get_burst_group(search_results, *group_definition, min_bursts=min_bursts)
+        grouped_results.extend(sub_results)
+    return grouped_results
+
+
 def find_group(
     orbit: int,
     footprint: Polygon,
@@ -135,29 +203,10 @@ def find_group(
     Returns:
         A list of S1BurstProduct objects
     """
-    if polarizations is None:
-        polarizations = ['VV']
-    bad_pols = set(polarizations) - set(['VV', 'VH', 'HV', 'HH'])
-    if bad_pols:
-        raise ValueError(f'Invalid polarizations: {" ".join(bad_pols)}')
-
-    if mode not in ['IW', 'EW']:
-        raise ValueError('Invalid mode: must be IW or EW')
-    elif mode == 'IW':
-        valid_swaths = ['IW1', 'IW2', 'IW3']
-    elif mode == 'EW':
-        valid_swaths = ['EW1', 'EW2', 'EW3', 'EW4', 'EW5']
-
-    if swaths is None:
-        swaths = [None]
-    else:
-        bad_swaths = set(swaths) - set(valid_swaths)
-        if bad_swaths:
-            raise ValueError(f'Invalid swaths: {" ".join(bad_swaths)}')
-
     if use_relative_orbit and not (start_date and end_date):
         raise ValueError('You must provide start and end dates when using relative orbit number.')
 
+    polarizations, swaths = sanitize_group_search_inputs(polarizations, swaths, mode)
     opts = dict(dataset=asf_search.constants.DATASET.SLC_BURST, intersectsWith=footprint.wkt, beamMode=mode)
     if use_relative_orbit:
         opts['relativeOrbit'] = orbit
@@ -167,16 +216,7 @@ def find_group(
         opts['absoluteOrbit'] = orbit
     search_results = asf_search.geo_search(**opts)
 
-    final_results = []
-    if use_relative_orbit:
-        absolute_orbits = list(set([int(result.properties['orbit']) for result in search_results]))
-        group_definitions = product(polarizations, swaths, absolute_orbits)
-    else:
-        group_definitions = product(polarizations, swaths)
-
-    for group_definition in group_definitions:
-        sub_results = get_burst_group(search_results, *group_definition, min_bursts=min_bursts)
-        final_results.extend(sub_results)
+    final_results = add_missing_bursts(search_results, polarizations, swaths, min_bursts, use_relative_orbit)
     return final_results
 
 
