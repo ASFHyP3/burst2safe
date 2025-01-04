@@ -35,13 +35,12 @@ def get_url_dict(burst_infos: Iterable[BurstInfo], force: bool = False) -> dict:
 @retry(
     reraise=True, retry=retry_if_result(lambda r: r.status == 202), wait=wait_random(0, 1), stop=stop_after_delay(120)
 )
-async def get_async(session: aiohttp.ClientSession, url: str, max_redirects: int = 5) -> aiohttp.ClientResponse:
+async def get_async(session: aiohttp.ClientSession, url: str) -> aiohttp.ClientResponse:
     """Retry a GET request until a non-202 response is received
 
     Args:
         session: An aiohttp ClientSession
         url: The URL to download
-        max_redirects: The maximum number of redirects to follow
 
     Returns:
         The response object
@@ -53,7 +52,7 @@ async def get_async(session: aiohttp.ClientSession, url: str, max_redirects: int
 
 @retry(reraise=True, stop=stop_after_attempt(3))
 async def download_burst_url_async(session: aiohttp.ClientSession, url: str, file_path: Path) -> None:
-    """Retry a GET request until a non-202 response is received, then download data.
+    """Retry a burst URL GET request until a non-202 response is received, then download the file.
 
     Args:
         session: An aiohttp ClientSession
@@ -61,16 +60,15 @@ async def download_burst_url_async(session: aiohttp.ClientSession, url: str, fil
         file_path: The path to save the downloaded data to
     """
     response = await get_async(session, url)
-    assert response.status == 200
 
     if file_path.suffix in ['.tif', '.tiff']:
         returned_filename = response.content_disposition.filename
     elif file_path.suffix == '.xml':
         url_parts = str(response.url).split('/')
-        ext = response.content_disposition.filename.split('.')[-1]
-        returned_filename = f'{url_parts[3]}_{url_parts[5]}.{ext}'
+        returned_filename = f'{url_parts[3]}_{url_parts[5]}.xml'
     else:
         raise ValueError(f'Invalid file extension: {file_path.suffix}')
+
     if file_path.name != returned_filename:
         raise ValueError(f'Race condition encountered, incorrect url returned for file: {file_path.name}')
 
@@ -78,12 +76,11 @@ async def download_burst_url_async(session: aiohttp.ClientSession, url: str, fil
         with open(file_path, 'wb') as f:
             async for chunk in response.content.iter_chunked(2**14):
                 f.write(chunk)
-        response.close()
     except Exception as e:
-        response.close()
-        if file_path.exists():
-            file_path.unlink()
+        file_path.unlink(missing_ok=True)
         raise e
+    finally:
+        response.close()
 
 
 async def download_bursts_async(url_dict: dict) -> None:
