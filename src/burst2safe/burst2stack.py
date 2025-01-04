@@ -41,8 +41,8 @@ def burst2stack(
         start_date: The start date of the bursts
         end_date: The end date of the bursts
         extent: The bounding box of the bursts
-        swaths: List of swaths to include
         polarizations: List of polarizations to include
+        swaths: List of swaths to include
         mode: The collection mode to use (IW or EW) (default: IW)
         min_bursts: The minimum number of bursts per swath (default: 1)
         all_anns: Include product annotation files for all swaths, regardless of included bursts
