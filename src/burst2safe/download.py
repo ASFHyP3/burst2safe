@@ -65,7 +65,8 @@ async def download_burst_url_async(session: aiohttp.ClientSession, url: str, fil
         returned_filename = response.content_disposition.filename
     elif file_path.suffix == '.xml':
         url_parts = str(response.url).split('/')
-        returned_filename = f'{url_parts[3]}_{url_parts[5]}.xml'
+        ext = response.content_disposition.filename.split('.')[-1]
+        returned_filename = f'{url_parts[3]}_{url_parts[5]}.{ext}'
     else:
         raise ValueError(f'Invalid file extension: {file_path.suffix}')
 
