@@ -5,7 +5,7 @@ on: [pull_request]
 jobs:
   call-secrets-analysis-workflow:
     # Docs: https://github.com/ASFHyP3/actions
-    uses: ASFHyP3/actions/.github/workflows/reusable-secrets-analysis.yml@v0.12.0
+    uses: ASFHyP3/actions/.github/workflows/reusable-secrets-analysis.yml@v0.13.2
 
   check-with-black:
     runs-on: ubuntu-latest
@@ -18,4 +18,4 @@ jobs:
 
   call-ruff-workflow:
     # Docs: https://github.com/ASFHyP3/actions
-    uses: ASFHyP3/actions/.github/workflows/reusable-ruff.yml@v0.12.0
+    uses: ASFHyP3/actions/.github/workflows/reusable-ruff.yml@v0.13.2

@@ -12,6 +12,7 @@ dependencies:
   - tifffile>=2022.04.22
   - asf_search
   - dateparser!=1.1.0
+  - aiohttp
   # For packaging, and testing
   - pytest
   - pytest-cov

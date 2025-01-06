@@ -6,6 +6,18 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [PEP 440](https://www.python.org/dev/peps/pep-0440/)
 and uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.4.0]
+
+### Added
+* download.py to support asynchronous downloads.
+* Support for EDL token based authentication.
+
+### Changed
+* Authorization behavior so that EDL credentials from an EDL token are prioritized above a username/password in either a netrc or the environment.
+* Authorization behavior so that EDL username/password from a user's netrc are prioritized. Now writes username/password to the netrc if they are provided as environment variables.
+* Switched to an asynchronous download approach.
+* In burst2stack.py all input files are now downloaded first.
+
 ## [1.3.1]
 
 ### Changed
