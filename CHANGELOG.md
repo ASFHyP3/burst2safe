@@ -9,12 +9,13 @@ and uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 ## [1.4.0]
 
 ### Added
-* Downloads.py to support asynchronous downloads.
+* download.py to support asynchronous downloads.
 * Support for EDL token based authentication.
 
 ### Changed
-* Authorization behavior so that EDL credentials from a user's netrc are prioritized. Now writes credentials to the netrc if they are provided as environment variables.
-* Switches to asynchronous download approach.
+* Authorization behavior so that EDL credentials from an EDL token are prioritized above a username/password in either a netrc or the environment.
+* Authorization behavior so that EDL username/password from a user's netrc are prioritized. Now writes username/password to the netrc if they are provided as environment variables.
+* Switched to an asynchronous download approach.
 * In burst2stack.py all input files are now downloaded first.
 
 ## [1.3.1]
