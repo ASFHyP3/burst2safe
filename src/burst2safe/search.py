@@ -1,21 +1,14 @@
-"""A package for converting ASF burst SLCs to the SAFE format"""
-
 import warnings
 from collections.abc import Iterable
-from concurrent.futures import ProcessPoolExecutor
 from datetime import datetime
 from itertools import product
-from multiprocessing import cpu_count
 from pathlib import Path
-from typing import List, Optional
+from typing import List, Optional, Tuple
 
 import asf_search
 import numpy as np
 from asf_search.Products.S1BurstProduct import S1BurstProduct
 from shapely.geometry import Polygon
-
-from burst2safe.auth import get_earthdata_credentials
-from burst2safe.utils import BurstInfo, download_url_with_retries
 
 
 warnings.filterwarnings('ignore')
@@ -37,29 +30,6 @@ def find_granules(granules: Iterable[str]) -> List[S1BurstProduct]:
         granule_str = ', '.joins(missing_granules)
         raise ValueError(f'Failed to find granule(s) {granule_str}. Check search parameters on Vertex.')
     return list(results)
-
-
-def find_stack_orbits(rel_orbit: int, extent: Polygon, start_date: datetime, end_date: datetime) -> List[int]:
-    """Find all orbits in a stack using ASF Search.
-
-    Args:
-        rel_orbit: The relative orbit number of the stack
-        start_date: The start date of the stack
-        end_date: The end date of the stack
-
-    Returns:
-        List of absolute orbit numbers
-    """
-    dataset = asf_search.constants.DATASET.SLC_BURST
-    search_results = asf_search.geo_search(
-        dataset=dataset,
-        relativeOrbit=rel_orbit,
-        intersectsWith=extent.centroid.wkt,
-        start=start_date.strftime('%Y-%m-%d'),
-        end=end_date.strftime('%Y-%m-%d'),
-    )
-    absolute_orbits = list(set([int(result.properties['orbit']) for result in search_results]))
-    return absolute_orbits
 
 
 def add_surrounding_bursts(bursts: List[S1BurstProduct], min_bursts: int) -> List[S1BurstProduct]:
@@ -95,28 +65,35 @@ def add_surrounding_bursts(bursts: List[S1BurstProduct], min_bursts: int) -> Lis
     return search_results
 
 
-def find_swath_pol_group(
-    search_results: List[S1BurstProduct], pol: str, swath: Optional[str], min_bursts: int
+def get_burst_group(
+    search_results: List[S1BurstProduct],
+    pol: str,
+    swath: Optional[str] = None,
+    orbit: Optional[int] = None,
+    min_bursts: int = 0,
 ) -> List[S1BurstProduct]:
-    """Find a group of bursts with the same polarization and swath.
+    """Find a group of bursts with the same polarization, swath and optionally orbit.
     Add surrounding bursts if the group is too small.
 
     Args:
         search_results: A list of S1BurstProduct objects
         pol: The polarization to search for
         swath: The swath to search for
+        orbit: The absolute orbit number of the bursts
         min_bursts: The minimum number of bursts per swath
 
     Returns:
         An updated list of S1BurstProduct objects
     """
+    params = []
+    if orbit:
+        search_results = [result for result in search_results if result.properties['orbit'] == orbit]
+        params.append(f'orbit {orbit}')
     if swath:
         search_results = [result for result in search_results if result.properties['burst']['subswath'] == swath]
-    search_results = [result for result in search_results if result.properties['polarization'] == pol]
-
-    params = [f'polarization {pol}']
-    if swath:
         params.append(f'swath {swath}')
+    search_results = [result for result in search_results if result.properties['polarization'] == pol]
+    params.append(f'polarization {pol}')
     params = ', '.join(params)
 
     if not search_results:
@@ -131,26 +108,18 @@ def find_swath_pol_group(
     return search_results
 
 
-def find_group(
-    orbit: int,
-    footprint: Polygon,
-    polarizations: Optional[Iterable] = None,
-    swaths: Optional[Iterable] = None,
-    mode: str = 'IW',
-    min_bursts: int = 1,
-) -> List[S1BurstProduct]:
-    """Find burst groups using ASF Search.
+def sanitize_group_search_inputs(
+    polarizations: Optional[Iterable] = None, swaths: Optional[Iterable] = None, mode: str = 'IW'
+) -> Tuple[List[str], List[str]]:
+    """Sanitize inputs for group search.
 
     Args:
-        orbit: The absolute orbit number of the bursts
-        footprint: The bounding box of the bursts
         polarizations: List of polarizations to include (default: VV)
         swaths: List of swaths to include (default: all)
         mode: The collection mode to use (IW or EW) (default: IW)
-        min_bursts: The minimum number of bursts per swath (default: 1)
 
     Returns:
-        A list of S1BurstProduct objects
+        A tuple of sanitized polarizations and swaths
     """
     if polarizations is None:
         polarizations = ['VV']
@@ -172,14 +141,82 @@ def find_group(
         if bad_swaths:
             raise ValueError(f'Invalid swaths: {" ".join(bad_swaths)}')
 
-    dataset = asf_search.constants.DATASET.SLC_BURST
-    search_results = asf_search.geo_search(
-        dataset=dataset, absoluteOrbit=orbit, intersectsWith=footprint.wkt, beamMode=mode
-    )
-    final_results = []
-    for pol, swath in product(polarizations, swaths):
-        sub_results = find_swath_pol_group(search_results, pol, swath, min_bursts)
-        final_results.extend(sub_results)
+    return polarizations, swaths
+
+
+def add_missing_bursts(
+    search_results: List[S1BurstProduct],
+    polarizations: List[str],
+    swaths: List[str],
+    min_bursts: int,
+    use_relative_orbit: bool,
+) -> List[S1BurstProduct]:
+    """Add missing bursts to the search results to ensure each swath/pol combo has at least `min_bursts` bursts.
+
+    Args:
+        search_results: A list of S1BurstProduct objects
+        polarizations: List of polarizations to include
+        swaths: List of swaths to include
+        min_bursts: The minimum number of bursts per swath (default: 1)
+        use_relative_orbit: Use relative orbit number instead of absolute orbit number (default: False)
+
+    Returns:
+        A list of S1BurstProduct objects
+    """
+    grouped_results = []
+    if use_relative_orbit:
+        absolute_orbits = list(set([int(result.properties['orbit']) for result in search_results]))
+        group_definitions = product(polarizations, swaths, absolute_orbits)
+    else:
+        group_definitions = product(polarizations, swaths)
+
+    for group_definition in group_definitions:
+        sub_results = get_burst_group(search_results, *group_definition, min_bursts=min_bursts)
+        grouped_results.extend(sub_results)
+    return grouped_results
+
+
+def find_group(
+    orbit: int,
+    footprint: Polygon,
+    polarizations: Optional[Iterable] = None,
+    swaths: Optional[Iterable] = None,
+    mode: str = 'IW',
+    min_bursts: int = 1,
+    start_date: Optional[datetime] = None,
+    end_date: Optional[datetime] = None,
+    use_relative_orbit: bool = False,
+) -> List[S1BurstProduct]:
+    """Find burst groups using ASF Search.
+
+    Args:
+        orbit: The absolute orbit number of the bursts
+        footprint: The bounding box of the bursts
+        polarizations: List of polarizations to include (default: VV)
+        swaths: List of swaths to include (default: all)
+        mode: The collection mode to use (IW or EW) (default: IW)
+        min_bursts: The minimum number of bursts per swath (default: 1)
+        start_date: The start date for relative orbit search
+        end_date: The end date for relative orbit search
+        use_relative_orbit: Use relative orbit number instead of absolute orbit number (default: False)
+
+    Returns:
+        A list of S1BurstProduct objects
+    """
+    if use_relative_orbit and not (start_date and end_date):
+        raise ValueError('You must provide start and end dates when using relative orbit number.')
+
+    polarizations, swaths = sanitize_group_search_inputs(polarizations, swaths, mode)
+    opts = dict(dataset=asf_search.constants.DATASET.SLC_BURST, intersectsWith=footprint.wkt, beamMode=mode)
+    if use_relative_orbit:
+        opts['relativeOrbit'] = orbit
+        opts['start'] = (f'{start_date.strftime("%Y-%m-%d")}T00:00:00Z',)
+        opts['end'] = (f'{end_date.strftime("%Y-%m-%d")}T23:59:59Z',)
+    else:
+        opts['absoluteOrbit'] = orbit
+    search_results = asf_search.geo_search(**opts)
+
+    final_results = add_missing_bursts(search_results, polarizations, swaths, min_bursts, use_relative_orbit)
     return final_results
 
 
@@ -214,27 +251,3 @@ def find_bursts(
             'You must provide either a list of granules or minimum set of group parameters (orbit, and footprint).'
         )
     return results
-
-
-def download_bursts(burst_infos: Iterable[BurstInfo]) -> None:
-    """Download the burst data and metadata files using multiple workers.
-
-    Args:
-        burst_infos: A list of BurstInfo objects
-    """
-    downloads = {}
-    for burst_info in burst_infos:
-        downloads[burst_info.data_path] = burst_info.data_url
-        downloads[burst_info.metadata_path] = burst_info.metadata_url
-    download_info = [(value, key.parent, key.name) for key, value in downloads.items()]
-    urls, dirs, names = zip(*download_info)
-
-    username, password = get_earthdata_credentials()
-    session = asf_search.ASFSession().auth_with_creds(username, password)
-    n_workers = min(len(urls), max(cpu_count() - 2, 1))
-    if n_workers == 1:
-        for url, dir, name in zip(urls, dirs, names):
-            download_url_with_retries(url, dir, name, session)
-    else:
-        with ProcessPoolExecutor(max_workers=n_workers) as executor:
-            executor.map(download_url_with_retries, urls, dirs, names, [session] * len(urls))

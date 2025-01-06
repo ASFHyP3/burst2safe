@@ -8,7 +8,6 @@ from datetime import datetime, timedelta
 from pathlib import Path
 from typing import Dict, List, Optional
 
-import asf_search
 import lxml.etree as ET
 from asf_search.Products.S1BurstProduct import S1BurstProduct
 from osgeo import gdal, ogr, osr
@@ -221,31 +220,6 @@ def get_subxml_from_metadata(
         desired_metadata = correct_pol[0].find('content')
 
     return desired_metadata
-
-
-def download_url_with_retries(
-    url: str, path: str, filename: str = None, session: asf_search.ASFSession = None, max_retries: int = 3
-) -> None:
-    """Download a file using asf_search.download_url with retries and backoff.
-
-    Args:
-        url: The URL to download
-        path: The path to save the file to
-        filename: The name of the file to save
-        session: The ASF session to use
-        max_retries: The maximum number of retries
-    """
-    n_retries = 0
-    file_exists = False
-    while n_retries < max_retries and not file_exists:
-        asf_search.download_url(url, path, filename, session)
-
-        n_retries += 1
-        if Path(path, filename).exists():
-            file_exists = True
-
-    if not file_exists:
-        raise ValueError(f'Failed to download {filename} after {max_retries} attempts.')
 
 
 def flatten(list_of_lists: List[List]) -> List:

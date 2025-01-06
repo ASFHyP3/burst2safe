@@ -1,16 +1,16 @@
 """A tool for converting stacks of ASF burst SLCs to stacks of SAFEs"""
 
 from argparse import ArgumentParser
-from collections.abc import Iterable
 from datetime import datetime
 from pathlib import Path
-from typing import Optional
+from typing import Iterable, List, Optional
 
 from shapely.geometry import Polygon
 
 from burst2safe import utils
-from burst2safe.burst2safe import burst2safe
-from burst2safe.search import find_stack_orbits
+from burst2safe.download import download_bursts
+from burst2safe.safe import Safe
+from burst2safe.search import find_group
 
 
 DESCRIPTION = """Convert a stack of ASF burst SLCs to a stack of ESA SAFEs.
@@ -32,7 +32,7 @@ def burst2stack(
     all_anns: bool = False,
     keep_files: bool = False,
     work_dir: Optional[Path] = None,
-) -> Path:
+) -> List[Path]:
     """Convert a stack of burst granules to a stack of ESA SAFEs.
     Wraps the burst2safe function to handle multiple dates.
 
@@ -41,30 +41,52 @@ def burst2stack(
         start_date: The start date of the bursts
         end_date: The end date of the bursts
         extent: The bounding box of the bursts
-        swaths: List of swaths to include
         polarizations: List of polarizations to include
+        swaths: List of swaths to include
         mode: The collection mode to use (IW or EW) (default: IW)
         min_bursts: The minimum number of bursts per swath (default: 1)
         all_anns: Include product annotation files for all swaths, regardless of included bursts
         keep_files: Keep the intermediate files
         work_dir: The directory to create the SAFE in (default: current directory)
     """
-    absolute_orbits = find_stack_orbits(rel_orbit, extent, start_date, end_date)
-    print(f'Creating SAFEs for {len(absolute_orbits)} time periods...')
-    for orbit in absolute_orbits:
-        print()
-        burst2safe(
-            granules=None,
-            orbit=orbit,
-            extent=extent,
-            polarizations=polarizations,
-            swaths=swaths,
-            mode=mode,
-            min_bursts=min_bursts,
-            all_anns=all_anns,
-            keep_files=keep_files,
-            work_dir=work_dir,
-        )
+    burst_search_results = find_group(
+        rel_orbit,
+        extent,
+        polarizations,
+        swaths,
+        mode,
+        min_bursts,
+        use_relative_orbit=True,
+        start_date=start_date,
+        end_date=end_date,
+    )
+    burst_infos = utils.get_burst_infos(burst_search_results, work_dir)
+    abs_orbits = utils.drop_duplicates([burst_info.absolute_orbit for burst_info in burst_infos])
+    print(f'Found {len(burst_infos)} burst(s), comprising {len(abs_orbits)} SAFE(s).')
+
+    print('Check burst group validities...')
+    burst_sets = [[bi for bi in burst_infos if bi.absolute_orbit == orbit] for orbit in abs_orbits]
+    # Checking burst group validities before download to fail faster
+    for burst_set in burst_sets:
+        Safe.check_group_validity(burst_set)
+
+    print('Downloading data...')
+    download_bursts(burst_infos)
+    print('Download complete.')
+
+    print('Creating SAFEs...')
+    safe_paths = []
+    for burst_set in burst_sets:
+        [info.add_shape_info() for info in burst_set]
+        [info.add_start_stop_utc() for info in burst_set]
+        safe = Safe(burst_set, all_anns, work_dir)
+        safe_path = safe.create_safe()
+        safe_paths.append(safe_path)
+        if not keep_files:
+            safe.cleanup()
+    print('SAFEs creaated!')
+
+    return safe_paths
 
 
 def main() -> None:
