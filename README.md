@@ -29,11 +29,13 @@ conda install -c conda-forge burst2safe
 
 ### Credentials
 To use `burst2safe`, you must provide your Earthdata Login credentials via two environment variables 
-(`EARTHDATA_USERNAME` and `EARTHDATA_PASSWORD`), or via your `.netrc` file.
+(`EARTHDATA_USERNAME` and `EARTHDATA_PASSWORD`), or via your `.netrc` file. Alternatively, you can use an Earthdata Login stored in the `EARTHDATA_TOKEN` environment variable.
 
 If you do not already have an Earthdata account, you can sign up [here](https://urs.earthdata.nasa.gov/home). 
 
 If you would like to set up Earthdata Login via your `.netrc` file, check out this [guide](https://harmony.earthdata.nasa.gov/docs#getting-started) to get started.
+
+If you would like to set up Earthdata Login via a token, check out this [guide](https://urs.earthdata.nasa.gov/documentation/for_users/user_token) to get started.
 
 ## burst2safe usage
 The `burst2safe` command line tool can be run using the following structure:
