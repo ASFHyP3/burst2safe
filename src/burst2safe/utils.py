@@ -6,7 +6,7 @@ from collections.abc import Iterable
 from dataclasses import dataclass
 from datetime import datetime, timedelta
 from pathlib import Path
-from typing import Dict, List, Optional
+from typing import Dict, List, Optional, Union
 
 import lxml.etree as ET
 from asf_search.Products.S1BurstProduct import S1BurstProduct
@@ -36,10 +36,10 @@ class BurstInfo:
     data_path: Path
     metadata_url: Path
     metadata_path: Path
-    start_utc: datetime = None
-    stop_utc: datetime = None
-    length: int = None
-    width: int = None
+    start_utc: Union[datetime, None] = None
+    stop_utc: Union[datetime, None] = None
+    length: Union[int, None] = None
+    width: Union[int, None] = None
 
     def add_shape_info(self):
         """Add shape information to the BurstInfo object."""
@@ -56,6 +56,7 @@ class BurstInfo:
         self.start_utc = start_utcs[self.burst_index]
 
         azimuth_time_interval = float(annotation.find('.//azimuthTimeInterval').text)
+        assert self.length is not None
         burst_time_interval = timedelta(seconds=(self.length - 1) * azimuth_time_interval)
         self.stop_utc = self.start_utc + burst_time_interval
 
@@ -116,7 +117,7 @@ def get_burst_infos(products: Iterable[S1BurstProduct], work_dir: Path) -> List[
     Returns:
         A list of BurstInfo objects.
     """
-    work_dir = optional_wd(work_dir)
+    work_dir = optional_wd(str(work_dir))
     burst_info_list = []
     for product in products:
         burst_info = create_burst_info(product, work_dir)
@@ -134,7 +135,7 @@ def sort_burst_infos(burst_info_list: List[BurstInfo]) -> Dict:
     Returns:
         Dictionary of sorted BurstInfo objects. First key is swath, second key is polarization.
     """
-    burst_infos = {}
+    burst_infos: dict = {}
     for burst_info in burst_info_list:
         if burst_info.swath not in burst_infos:
             burst_infos[burst_info.swath] = {}
@@ -161,9 +162,7 @@ def optional_wd(wd: Optional[str] = None) -> Path:
     Returns:
         Path to your input working directory or the current working directory.
     """
-    if wd is None:
-        wd = Path.cwd()
-    return Path(wd).resolve()
+    return Path(wd).resolve() if wd else Path.cwd()
 
 
 def calculate_crc16(file_path: Path) -> str:
@@ -183,7 +182,7 @@ def calculate_crc16(file_path: Path) -> str:
 
 
 def get_subxml_from_metadata(
-    metadata_path: Path, xml_type: str, subswath: str = None, polarization: str = None
+    metadata_path: Path, xml_type: str, subswath: Optional[str] = None, polarization: Optional[str] = None
 ) -> ET.Element:
     """Extract child xml info from ASF combined metadata file.
 
@@ -239,7 +238,7 @@ def set_text(element: ET.Element, text: str) -> None:
         element: The element to set the text of.
         text: The text to set the element to.
     """
-    if not isinstance(text, str) and not isinstance(text, int):
+    if not isinstance(text, str) and not isinstance(text, int):  # type: ignore [unreachable]
         raise ValueError('Text must be a string or an integer.')
 
     element.text = str(text)

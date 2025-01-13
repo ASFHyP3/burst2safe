@@ -95,7 +95,7 @@ class Swath:
             raise ValueError(f'All bursts must have consecutive burst IDs. Found: {burst_ids}.')
 
     @staticmethod
-    def get_swath_name(burst_infos: Iterable[BurstInfo], safe_path: Path, image_number: int) -> str:
+    def get_swath_name(burst_infos: list[BurstInfo], safe_path: Path, image_number: int) -> str:
         """Get the name of the swath. Will be used to name constituent output files.
 
         Args:
@@ -180,7 +180,7 @@ class Swath:
 
     def create_manifest_components(self):
         """Create the manifest components for the Swath."""
-        self.manifest_components = {
+        self.manifest_components: dict[str, list] = {
             'content_unit': [],
             'metadata_object': [],
             'data_object': [],

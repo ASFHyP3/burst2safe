@@ -3,7 +3,7 @@ from collections.abc import Iterable
 from datetime import datetime
 from itertools import product
 from pathlib import Path
-from typing import List, Optional, Tuple
+from typing import List, Optional, Tuple, Union
 
 import asf_search
 import numpy as np
@@ -27,7 +27,7 @@ def find_granules(granules: Iterable[str]) -> List[S1BurstProduct]:
     found_granules = [result.properties['fileID'] for result in results]
     missing_granules = list(set(granules) - set(found_granules))
     if missing_granules:
-        granule_str = ', '.joins(missing_granules)
+        granule_str = ', '.join(missing_granules)
         raise ValueError(f'Failed to find granule(s) {granule_str}. Check search parameters on Vertex.')
     return list(results)
 
@@ -94,23 +94,23 @@ def get_burst_group(
         params.append(f'swath {swath}')
     search_results = [result for result in search_results if result.properties['polarization'] == pol]
     params.append(f'polarization {pol}')
-    params = ', '.join(params)
+    param_str = ', '.join(params)
 
     if not search_results:
-        raise ValueError(f'No bursts found for {params}. Check search parameters on Vertex.')
+        raise ValueError(f'No bursts found for {param_str}. Check search parameters on Vertex.')
 
     if len(search_results) < min_bursts:
         search_results = add_surrounding_bursts(search_results, min_bursts)
 
     if len(search_results) < min_bursts:
-        raise ValueError(f'Less than {min_bursts} bursts found for {params}. Check search parameters on Vertex.')
+        raise ValueError(f'Less than {min_bursts} bursts found for {param_str}. Check search parameters on Vertex.')
 
     return search_results
 
 
 def sanitize_group_search_inputs(
-    polarizations: Optional[Iterable] = None, swaths: Optional[Iterable] = None, mode: str = 'IW'
-) -> Tuple[List[str], List[str]]:
+    polarizations: Optional[list] = None, swaths: Optional[list] = None, mode: str = 'IW'
+) -> Tuple[list[str], list[str]]:
     """Sanitize inputs for group search.
 
     Args:
@@ -168,7 +168,7 @@ def add_missing_bursts(
         absolute_orbits = list(set([int(result.properties['orbit']) for result in search_results]))
         group_definitions = product(polarizations, swaths, absolute_orbits)
     else:
-        group_definitions = product(polarizations, swaths)
+        group_definitions = product(polarizations, swaths)  # type: ignore [assignment]
 
     for group_definition in group_definitions:
         sub_results = get_burst_group(search_results, *group_definition, min_bursts=min_bursts)
@@ -179,8 +179,8 @@ def add_missing_bursts(
 def find_group(
     orbit: int,
     footprint: Polygon,
-    polarizations: Optional[Iterable] = None,
-    swaths: Optional[Iterable] = None,
+    polarizations: Optional[list[str]] = None,
+    swaths: Optional[list[str]] = None,
     mode: str = 'IW',
     min_bursts: int = 1,
     start_date: Optional[datetime] = None,
@@ -209,6 +209,8 @@ def find_group(
     polarizations, swaths = sanitize_group_search_inputs(polarizations, swaths, mode)
     opts = dict(dataset=asf_search.constants.DATASET.SLC_BURST, intersectsWith=footprint.wkt, beamMode=mode)
     if use_relative_orbit:
+        assert start_date is not None
+        assert end_date is not None
         opts['relativeOrbit'] = orbit
         opts['start'] = (f'{start_date.strftime("%Y-%m-%d")}T00:00:00Z',)
         opts['end'] = (f'{end_date.strftime("%Y-%m-%d")}T23:59:59Z',)
@@ -224,11 +226,11 @@ def find_bursts(
     granules: Optional[Iterable[str]] = None,
     orbit: Optional[int] = None,
     footprint: Optional[Polygon] = None,
-    polarizations: Optional[Iterable[str]] = None,
-    swaths: Optional[Iterable[str]] = None,
+    polarizations: Optional[list[str]] = None,
+    swaths: Optional[list[str]] = None,
     mode: str = 'IW',
     min_bursts: int = 1,
-) -> Path:
+) -> list[S1BurstProduct]:
     """Find bursts using ASF Search.
 
     Args:

@@ -2,6 +2,7 @@ from collections.abc import Iterable
 from copy import deepcopy
 from dataclasses import dataclass
 from datetime import timedelta
+from typing import Union
 
 import lxml.etree as ET
 import numpy as np
@@ -39,11 +40,11 @@ class Product(Annotation):
         self.image_annotation = None
         self.doppler_centroid = None
         self.antenna_pattern = None
-        self.swath_timing = None
-        self.geolocation_grid = None
+        self.swath_timing: Union[ET.Element, None] = None
+        self.geolocation_grid: Union[ET.Element, None] = None
         self.coordinate_conversion = None
         self.swath_merging = None
-        self.gcps = []
+        self.gcps: list = []
 
     def create_quality_information(self):
         """Create the qualityInformation element."""
@@ -212,6 +213,7 @@ class Product(Annotation):
 
     def update_gcps(self):
         """Update gcp attribute using the geolocationGridPointList."""
+        assert self.geolocation_grid is not None
         gcp_xmls = self.geolocation_grid.find('geolocationGridPointList').findall('*')
         for gcp_xml in gcp_xmls:
             gcp = GeoPoint(
@@ -261,11 +263,13 @@ class Product(Annotation):
 
     def remove_burst_data(self):
         """Remove data from burstList and geolocationGrid."""
+        assert self.swath_timing is not None
         burst_list = self.swath_timing.find('burstList')
         burst_list.set('count', '0')
         for child in burst_list:
             burst_list.remove(child)
 
+        assert self.geolocation_grid is not None
         geolocation_grid = self.geolocation_grid.find('geolocationGridPointList')
         geolocation_grid.set('count', '0')
         for child in geolocation_grid:
