@@ -177,7 +177,7 @@ def calculate_crc16(file_path: Path) -> str:
     with open(file_path, 'rb') as f:
         data = f.read()
 
-    crc = f'{crc_hqx(data, 0xffff):04X}'
+    crc = f'{crc_hqx(data, 0xFFFF):04X}'
     return crc
 
 

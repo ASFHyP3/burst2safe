@@ -2,8 +2,7 @@ import warnings
 from collections.abc import Iterable
 from datetime import datetime
 from itertools import product
-from pathlib import Path
-from typing import List, Optional, Tuple, Union
+from typing import List, Optional, Tuple
 
 import asf_search
 import numpy as np

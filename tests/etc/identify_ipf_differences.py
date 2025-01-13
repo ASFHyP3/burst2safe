@@ -72,7 +72,7 @@ def download_slcs():
 
 
 def get_version(slc_path):
-    slc_name = f"{slc_path.name.split('.')[0]}.SAFE"
+    slc_name = f'{slc_path.name.split(".")[0]}.SAFE'
     with ZipFile(slc_path) as z:
         manifest_str = z.read(f'{slc_name}/manifest.safe')
         manifest = ET.fromstring(manifest_str)
@@ -90,7 +90,7 @@ def extract_support_folder(slc_path):
     version = get_version(slc_path).replace('.', '')
     out_dir = Path(f'support_{version}')
     out_dir.mkdir(exist_ok=True)
-    slc_name = f"{slc_path.name.split('.')[0]}.SAFE"
+    slc_name = f'{slc_path.name.split(".")[0]}.SAFE'
     with ZipFile(slc_path) as zip_ref:
         for file_info in zip_ref.infolist():
             if file_info.filename.startswith(f'{slc_name}/support/') and not file_info.is_dir():

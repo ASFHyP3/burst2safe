@@ -10,7 +10,7 @@ import lxml.etree as ET
 import numpy as np
 from shapely.geometry import MultiPolygon, Polygon
 
-from burst2safe.base import create_content_unit, create_data_object, create_metadata_object, Annotation
+from burst2safe.base import Annotation, create_content_unit, create_data_object, create_metadata_object
 from burst2safe.manifest import Kml, Manifest, Preview
 from burst2safe.product import Product
 from burst2safe.swath import Swath

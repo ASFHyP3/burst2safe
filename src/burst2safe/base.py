@@ -1,5 +1,4 @@
 import hashlib
-from collections.abc import Iterable
 from copy import deepcopy
 from datetime import datetime, timedelta
 from pathlib import Path
