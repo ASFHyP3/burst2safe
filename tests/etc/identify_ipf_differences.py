@@ -67,8 +67,8 @@ def find_representative_bursts(important_only=False):
 
 def download_slcs():
     slcs = [f'{burst.slc_granule}-SLC' for burst in find_representative_bursts()]
-    slcs = asf.granule_search(slcs)
-    slcs.download('.')
+    slc_results = asf.granule_search(slcs)
+    slc_results.download('.')
 
 
 def get_version(slc_path):
@@ -134,8 +134,8 @@ def download_changing_metadata():
 
 def download_representative_support():
     slcs = [f'{burst.slc_granule}-SLC' for burst in find_representative_bursts(important_only=True)]
-    slcs = asf.granule_search(slcs)
-    slcs.download('.')
+    slc_results = asf.granule_search(slcs)
+    slc_results.download('.')
     slc_paths = sorted(list(Path().glob('*.zip')))
     for slc_path in slc_paths:
         extract_support_folder(slc_path)
