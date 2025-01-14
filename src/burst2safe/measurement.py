@@ -1,7 +1,7 @@
 import hashlib
 from datetime import datetime
 from pathlib import Path
-from typing import Tuple, Optional, cast
+from typing import Optional, Tuple, cast
 
 import numpy as np
 from osgeo import gdal, osr

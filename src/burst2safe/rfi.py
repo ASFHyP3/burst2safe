@@ -1,4 +1,3 @@
-from collections.abc import Iterable
 from copy import deepcopy
 
 import lxml.etree as ET

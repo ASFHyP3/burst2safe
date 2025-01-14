@@ -6,7 +6,7 @@ from collections.abc import Iterable
 from dataclasses import dataclass
 from datetime import datetime, timedelta
 from pathlib import Path
-from typing import Dict, List, Optional, Union, TypeVar
+from typing import Dict, List, Optional, Union
 
 import lxml.etree as ET
 from asf_search.Products.S1BurstProduct import S1BurstProduct

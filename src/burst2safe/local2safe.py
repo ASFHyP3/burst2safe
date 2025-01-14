@@ -4,7 +4,7 @@ import argparse
 import json
 from datetime import datetime
 from pathlib import Path
-from typing import Optional, cast, Union
+from typing import Optional, Union, cast
 
 from burst2safe import utils
 from burst2safe.burst_id import calculate_burstid
