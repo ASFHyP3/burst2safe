@@ -1,7 +1,7 @@
 import hashlib
 from datetime import datetime
 from pathlib import Path
-from typing import Tuple, Union
+from typing import Tuple, Optional
 
 import numpy as np
 from osgeo import gdal, osr
@@ -52,8 +52,8 @@ class Measurement:
 
         self.data_mean = None
         self.data_std = None
-        self.size_bytes: Union[int, None] = None
-        self.md5: Union[str, None] = None
+        self.size_bytes: Optional[int] = None
+        self.md5: Optional[str] = None
         self.byte_offsets: list = []
 
     def get_data(self, band: int = 1) -> np.ndarray:

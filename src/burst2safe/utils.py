@@ -6,7 +6,7 @@ from collections.abc import Iterable
 from dataclasses import dataclass
 from datetime import datetime, timedelta
 from pathlib import Path
-from typing import Dict, List, Optional, Union
+from typing import Dict, List, Optional
 
 import lxml.etree as ET
 from asf_search.Products.S1BurstProduct import S1BurstProduct
@@ -36,10 +36,10 @@ class BurstInfo:
     data_path: Path
     metadata_url: Path
     metadata_path: Path
-    start_utc: Union[datetime, None] = None
-    stop_utc: Union[datetime, None] = None
-    length: Union[int, None] = None
-    width: Union[int, None] = None
+    start_utc: Optional[datetime] = None
+    stop_utc: Optional[datetime] = None
+    length: Optional[int] = None
+    width: Optional[int] = None
 
     def add_shape_info(self):
         """Add shape information to the BurstInfo object."""

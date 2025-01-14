@@ -4,7 +4,7 @@ from collections.abc import Iterable
 from datetime import datetime
 from itertools import product
 from pathlib import Path
-from typing import List, Optional, Tuple, Union
+from typing import List, Optional, Tuple
 
 import lxml.etree as ET
 import numpy as np
@@ -39,8 +39,8 @@ class Safe:
         self.safe_path = self.work_dir / self.name
         self.swaths: list = []
         self.blank_products: list = []
-        self.manifest: Union[ET.Element, None] = None
-        self.kml: Union[Annotation, None] = None
+        self.manifest: Optional[ET.Element] = None
+        self.kml: Optional[Annotation] = None
 
         self.version = self.get_ipf_version(self.burst_infos[0].metadata_path)
         self.major_version, self.minor_version = [int(x) for x in self.version.split('.')]

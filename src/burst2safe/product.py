@@ -2,7 +2,7 @@ from collections.abc import Iterable
 from copy import deepcopy
 from dataclasses import dataclass
 from datetime import timedelta
-from typing import Union
+from typing import Optional
 
 import lxml.etree as ET
 import numpy as np
@@ -40,8 +40,8 @@ class Product(Annotation):
         self.image_annotation = None
         self.doppler_centroid = None
         self.antenna_pattern = None
-        self.swath_timing: Union[ET.Element, None] = None
-        self.geolocation_grid: Union[ET.Element, None] = None
+        self.swath_timing: Optional[ET.Element] = None
+        self.geolocation_grid: Optional[ET.Element] = None
         self.coordinate_conversion = None
         self.swath_merging = None
         self.gcps: list = []

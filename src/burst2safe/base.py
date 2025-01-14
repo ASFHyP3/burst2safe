@@ -24,8 +24,8 @@ class ListOfListElements:
             slc_lengths: The total line lengths of the SLCs corresponding to each element.
         """
         self.inputs: list[ET.Element] = inputs
-        self.start_line: Union[int, None] = start_line
-        self.slc_lengths: Union[list[int], None] = slc_lengths
+        self.start_line: Optional[int] = start_line
+        self.slc_lengths: Optional[list[int]] = slc_lengths
 
         self.name = self.inputs[0].tag
         elements = flatten([element.findall('*') for element in self.inputs])
@@ -278,11 +278,11 @@ class Annotation:
 
         # annotation components to be extended by subclasses
         self.ads_header = None
-        self.xml: Union[ET.Element, None] = None
+        self.xml: Optional[ET.Element] = None
 
         # these attributes are updated when the annotation is written to a file
-        self.size_bytes: Union[int, None] = None
-        self.md5: Union[str, None] = None
+        self.size_bytes: Optional[int] = None
+        self.md5: Optional[str] = None
 
     def create_ads_header(self):
         """Create the ADS header for the annotation."""
