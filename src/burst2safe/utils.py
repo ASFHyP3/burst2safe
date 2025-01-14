@@ -162,7 +162,7 @@ def optional_wd(wd: Optional[Union[Path, str]] = None) -> Path:
     Returns:
         Path to your input working directory or the current working directory.
     """
-    return Path(wd).resolve() if wd else Path.cwd()
+    return Path(wd).resolve() if wd is not None else Path.cwd()
 
 
 def calculate_crc16(file_path: Path) -> str:
