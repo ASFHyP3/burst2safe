@@ -68,7 +68,7 @@ class TestListOfListElements:
         lines = [x.find('line').text for x in filtered]
         assert lines == ['0', '100', '200', '300', '400']
 
-        filtered = list_of_lists.create_filtered_list((time1, time2), line_bounds=(200., 300.))
+        filtered = list_of_lists.create_filtered_list((time1, time2), line_bounds=(200.0, 300.0))
         assert len(filtered) == 2
         lines = [x.find('line').text for x in filtered]
         assert lines == ['200', '300']

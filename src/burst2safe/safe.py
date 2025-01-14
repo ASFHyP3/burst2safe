@@ -20,7 +20,9 @@ from burst2safe.utils import BurstInfo, drop_duplicates, flatten, get_subxml_fro
 class Safe:
     """Class representing a SAFE file."""
 
-    def __init__(self, burst_infos: list[BurstInfo], all_anns: bool = False, work_dir: Optional[Union[Path, str]] = None):
+    def __init__(
+        self, burst_infos: list[BurstInfo], all_anns: bool = False, work_dir: Optional[Union[Path, str]] = None
+    ):
         """Initialize a Safe object.
 
         Args:
