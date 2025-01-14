@@ -6,7 +6,7 @@ from collections.abc import Iterable
 from dataclasses import dataclass
 from datetime import datetime, timedelta
 from pathlib import Path
-from typing import Dict, List, Optional
+from typing import Dict, List, Optional, Union, TypeVar
 
 import lxml.etree as ET
 from asf_search.Products.S1BurstProduct import S1BurstProduct
@@ -22,19 +22,19 @@ warnings.filterwarnings('ignore')
 class BurstInfo:
     """Dataclass for storing burst information."""
 
-    granule: str
-    slc_granule: str
+    granule: Optional[str]
+    slc_granule: Optional[str]
     swath: str
     polarization: str
-    burst_id: int
+    burst_id: Optional[int]
     burst_index: int
     direction: str
     absolute_orbit: int
     relative_orbit: int
-    date: datetime
-    data_url: Path
-    data_path: Path
-    metadata_url: Path
+    date: Optional[datetime]
+    data_url: Optional[str]
+    data_path: Optional[Path]
+    metadata_url: Optional[str]
     metadata_path: Path
     start_utc: Optional[datetime] = None
     stop_utc: Optional[datetime] = None
@@ -107,17 +107,17 @@ def create_burst_info(product: S1BurstProduct, work_dir: Path) -> BurstInfo:
     return burst_info
 
 
-def get_burst_infos(products: Iterable[S1BurstProduct], work_dir: Path) -> List[BurstInfo]:
+def get_burst_infos(products: Iterable[S1BurstProduct], work_dir: Optional[Path]) -> List[BurstInfo]:
     """Get burst information from ASF Search.
 
     Args:
         products: A list of S1BurstProduct objects.
-        save_dir: The directory to save the data to.
+        work_dir: The directory to save the data to.
 
     Returns:
         A list of BurstInfo objects.
     """
-    work_dir = optional_wd(str(work_dir))
+    work_dir = optional_wd(work_dir)
     burst_info_list = []
     for product in products:
         burst_info = create_burst_info(product, work_dir)
@@ -153,7 +153,7 @@ def sort_burst_infos(burst_info_list: List[BurstInfo]) -> Dict:
     return burst_infos
 
 
-def optional_wd(wd: Optional[str] = None) -> Path:
+def optional_wd(wd: Optional[Union[Path, str]] = None) -> Path:
     """Return the working directory as a Path object
 
     Args:
@@ -231,14 +231,14 @@ def drop_duplicates(input_list: List) -> List:
     return list(dict.fromkeys(input_list))
 
 
-def set_text(element: ET.Element, text: str) -> None:
+def set_text(element: ET.Element, text: Union[str, int]) -> None:
     """Set the text of an element if it is not None.
 
     Args:
         element: The element to set the text of.
         text: The text to set the element to.
     """
-    if not isinstance(text, str) and not isinstance(text, int):  # type: ignore [unreachable]
+    if not isinstance(text, str) and not isinstance(text, int):
         raise ValueError('Text must be a string or an integer.')
 
     element.text = str(text)

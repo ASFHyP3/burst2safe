@@ -77,7 +77,7 @@ class Manifest:
         self.data_object_section: Optional[ET.Element] = None
         self.xml: Optional[ET.Element] = None
         self.path: Optional[Path] = None
-        self.crc = None
+        self.crc: Optional[str] = None
 
     def create_information_package_map(self):
         """Create the information package map."""

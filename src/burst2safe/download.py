@@ -25,6 +25,7 @@ def get_url_dict(burst_infos: Iterable[BurstInfo], force: bool = False) -> dict:
     """
     url_dict = {}
     for burst_info in burst_infos:
+        assert burst_info.data_path is not None
         if force or not burst_info.data_path.exists():
             url_dict[burst_info.data_path] = burst_info.data_url
         if force or not burst_info.metadata_path.exists():

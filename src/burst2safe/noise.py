@@ -11,7 +11,7 @@ from burst2safe.utils import BurstInfo, flatten
 class Noise(Annotation):
     """Class representing a Noise XML."""
 
-    def __init__(self, burst_infos: Iterable[BurstInfo], ipf_version: str, image_number: int):
+    def __init__(self, burst_infos: list[BurstInfo], ipf_version: str, image_number: int):
         """Create a Noise object.
 
         Args:

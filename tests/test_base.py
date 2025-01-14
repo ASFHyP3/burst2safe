@@ -63,12 +63,12 @@ class TestListOfListElements:
 
         time1 = datetime.fromisoformat('2020-01-01T00:00:15')
         time2 = datetime.fromisoformat('2020-01-01T00:01:15')
-        filtered = list_of_lists.create_filtered_list([time1, time2])
+        filtered = list_of_lists.create_filtered_list((time1, time2))
         assert len(filtered) == 5
         lines = [x.find('line').text for x in filtered]
         assert lines == ['0', '100', '200', '300', '400']
 
-        filtered = list_of_lists.create_filtered_list([time1, time2], line_bounds=[200, 300])
+        filtered = list_of_lists.create_filtered_list((time1, time2), line_bounds=(200., 300.))
         assert len(filtered) == 2
         lines = [x.find('line').text for x in filtered]
         assert lines == ['200', '300']
@@ -146,7 +146,7 @@ class TestAnnotation:
         assert annotation.ads_header is None
         annotation.create_ads_header()
         assert annotation.ads_header is not None
-        assert annotation.ads_header.find('startTime').text is not None  # type: ignore [unreachable]
+        assert annotation.ads_header.find('startTime').text is not None  # type: ignore[unreachable]
         assert annotation.ads_header.find('stopTime').text is not None
         assert annotation.ads_header.find('imageNumber').text == '001'
 
@@ -164,7 +164,8 @@ class TestAnnotation:
         assert annotation.md5 is None
 
         annotation.write(tmp_path / 'test_annotation.xml', update_info=True)
-        assert annotation.size_bytes > 0  # type: ignore [operator]
+        assert annotation.size_bytes is not None
+        assert annotation.size_bytes > 0  # type: ignore[unreachable]
         assert annotation.md5 is not None
 
     def test_create_manifest_components(self, annotation):

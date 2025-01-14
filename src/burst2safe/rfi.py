@@ -13,7 +13,7 @@ class Rfi(Annotation):
     Note: RFI annotations only available for IPF version 3.40 onwards.
     """
 
-    def __init__(self, burst_infos: Iterable[BurstInfo], ipf_version: str, image_number: int):
+    def __init__(self, burst_infos: list[BurstInfo], ipf_version: str, image_number: int):
         """Create a calibration object.
 
         Args:

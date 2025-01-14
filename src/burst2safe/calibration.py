@@ -10,7 +10,7 @@ from burst2safe.utils import BurstInfo
 class Calibration(Annotation):
     """Class representing a calibration XML."""
 
-    def __init__(self, burst_infos: Iterable[BurstInfo], ipf_version: str, image_number: int):
+    def __init__(self, burst_infos: list[BurstInfo], ipf_version: str, image_number: int):
         """Create a calibration object.
 
         Args:
