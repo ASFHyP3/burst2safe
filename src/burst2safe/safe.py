@@ -210,7 +210,7 @@ class Safe:
         """Create a directory for the SAFE file.
 
         Returns:
-            The path to the SAFE directory
+            None
         """
         measurements_dir = self.safe_path / 'measurement'
         annotations_dir = self.safe_path / 'annotation'
