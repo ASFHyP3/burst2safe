@@ -311,7 +311,9 @@ class Safe:
             blank_product.write(product_name)
             self.blank_products.append(blank_product)
 
-    def add_preview_components(self, content_units: List, metadata_objects: List, data_objects: List) -> List:
+    def add_preview_components(
+        self, content_units: list, metadata_objects: list, data_objects: list
+    ) -> tuple[list, list, list]:
         """Add the preview components to unit lists.
 
         Args:
@@ -354,7 +356,7 @@ class Safe:
         )
         data_objects += [overlay_data_object, preview_data_object]
 
-        return [content_units, metadata_objects, data_objects]
+        return content_units, metadata_objects, data_objects
 
     def compile_manifest_components(self) -> Tuple[List, List, List]:
         """Compile the manifest components for all files within the SAFE file.
