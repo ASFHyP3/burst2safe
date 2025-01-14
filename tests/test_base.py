@@ -146,7 +146,7 @@ class TestAnnotation:
         assert annotation.ads_header is None
         annotation.create_ads_header()
         assert annotation.ads_header is not None
-        assert annotation.ads_header.find('startTime').text is not None
+        assert annotation.ads_header.find('startTime').text is not None  # type: ignore [unreachable]
         assert annotation.ads_header.find('stopTime').text is not None
         assert annotation.ads_header.find('imageNumber').text == '001'
 
@@ -164,7 +164,7 @@ class TestAnnotation:
         assert annotation.md5 is None
 
         annotation.write(tmp_path / 'test_annotation.xml', update_info=True)
-        assert annotation.size_bytes > 0
+        assert annotation.size_bytes > 0  # type: ignore [operator]
         assert annotation.md5 is not None
 
     def test_create_manifest_components(self, annotation):

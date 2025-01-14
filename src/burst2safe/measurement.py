@@ -1,8 +1,7 @@
 import hashlib
-from collections.abc import Iterable
 from datetime import datetime
 from pathlib import Path
-from typing import Tuple
+from typing import Tuple, Union
 
 import numpy as np
 from osgeo import gdal, osr
@@ -18,8 +17,8 @@ class Measurement:
 
     def __init__(
         self,
-        burst_infos: Iterable[BurstInfo],
-        gcps: Iterable[GeoPoint],
+        burst_infos: list[BurstInfo],
+        gcps: list[GeoPoint],
         creation_time: datetime,
         ipf_version: str,
         image_number: int,
@@ -53,9 +52,9 @@ class Measurement:
 
         self.data_mean = None
         self.data_std = None
-        self.size_bytes = None
-        self.md5 = None
-        self.byte_offsets = []
+        self.size_bytes: Union[int, None] = None
+        self.md5: Union[str, None] = None
+        self.byte_offsets: list = []
 
     def get_data(self, band: int = 1) -> np.ndarray:
         """Get the data for the measurement from ASF burst GeoTIFFs.
@@ -81,10 +80,10 @@ class Measurement:
                 raise ValueError('Byte offset calculation only valid for GeoTIFFs with one band.')
             page = tif.pages[0]
 
-            if page.compression._name_ != 'NONE':
+            if page.compression._name_ != 'NONE':  # type: ignore [attr-defined]
                 raise ValueError('Byte offset calculation only valid for uncompressed GeoTIFFs.')
 
-            if page.chunks != (1, page.imagewidth):
+            if page.chunks != (1, page.imagewidth):  # type: ignore [union-attr]
                 raise ValueError('Byte offset calculation only valid for GeoTIFFs with one line per block.')
 
             offsets = page.dataoffsets

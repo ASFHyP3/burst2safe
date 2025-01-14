@@ -60,11 +60,12 @@ async def download_burst_url_async(session: aiohttp.ClientSession, url: str, fil
         file_path: The path to save the downloaded data to
     """
     response = await get_async(session, url)
-
+    assert response.content_disposition is not None
     if file_path.suffix in ['.tif', '.tiff']:
         returned_filename = response.content_disposition.filename
     elif file_path.suffix == '.xml':
         url_parts = str(response.url).split('/')
+        assert response.content_disposition.filename is not None
         ext = response.content_disposition.filename.split('.')[-1]
         returned_filename = f'{url_parts[3]}_{url_parts[5]}.{ext}'
     else:
@@ -116,4 +117,4 @@ def download_bursts(burst_infos: Iterable[BurstInfo]) -> None:
     full_dict = get_url_dict(burst_infos, force=True)
     missing_data = [x for x in full_dict.keys() if not x.exists]
     if missing_data:
-        raise ValueError(f'Error downloading, missing files: {", ".join(missing_data.name)}')
+        raise ValueError(f'Error downloading, missing files: {", ".join([x.name for x in missing_data])}')

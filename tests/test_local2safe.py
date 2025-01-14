@@ -1,6 +1,6 @@
 from copy import deepcopy
 
-from burst2safe import local2safe
+from burst2safe import local2safe  # type: ignore [attr-defined]
 
 
 def test_burst_from_local(burst_info1, burst_info2):

@@ -1,7 +1,7 @@
 import hashlib
 from copy import deepcopy
 from pathlib import Path
-from typing import List
+from typing import List, Union
 
 import lxml.etree as ET
 import numpy as np
@@ -73,10 +73,10 @@ class Manifest:
 
         # Updated by methods
         self.information_package_map = None
-        self.metadata_section = None
-        self.data_object_section = None
-        self.xml = None
-        self.path = None
+        self.metadata_section: Union[ET.Element, None] = None
+        self.data_object_section: Union[ET.Element, None] = None
+        self.xml: Union[ET.Element, None] = None
+        self.path: Union[Path, None] = None
         self.crc = None
 
     def create_information_package_map(self):
@@ -157,6 +157,7 @@ class Manifest:
             out_path: The path to write the manifest to
             update_info: Whether to update the path and CRC
         """
+        assert self.xml is not None
         self.xml.write(out_path, pretty_print=True, xml_declaration=True, encoding='utf-8')
         if update_info:
             self.path = out_path
@@ -173,7 +174,7 @@ class Kml:
             bbox: The bounding box of the product
         """
         self.bbox = bbox
-        self.xml = None
+        self.xml: Union[ET.Element, None] = None
 
     def assemble(self):
         """Assemble the components of the SAFE KML preview file."""
@@ -208,6 +209,7 @@ class Kml:
             out_path: The path to write the manifest to
             update_info: Whether to update the path
         """
+        assert self.xml is not None
         self.xml.write(out_path, pretty_print=True, xml_declaration=True, encoding='utf-8')
         if update_info:
             self.path = out_path
@@ -266,8 +268,8 @@ class Preview:
         ]
         if len(self.rfi) > 0:
             self.support.append('s1-level-1-rfi.xsd')
-        self.html = None
-        self.path = None
+        self.html: Union[ET.Element, None] = None
+        self.path: Union[Path, None] = None
 
     def create_base(self):
         """Create the base HTML product preview."""
@@ -350,6 +352,7 @@ class Preview:
             out_path: The path to write the annotation to.
             update_info: Whether to update the size and md5 attributes of the html.
         """
+        assert self.html is not None
         self.html.write(out_path, pretty_print=True, xml_declaration=True, encoding='utf-8')
 
         if update_info:
@@ -365,6 +368,7 @@ class Preview:
         Args:
             safe_path: The new SAFE path
         """
+        assert self.path is not None
         parts = self.path.parts
         parent_index = parts.index(safe_path.parent.name)
         self.path = safe_path / Path(*parts[parent_index + 2 :])
