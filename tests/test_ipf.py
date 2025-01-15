@@ -41,7 +41,9 @@ def test_versions(version, burst, tmp_path):
 
     support_dir = safe.safe_path / 'support'
 
+    assert safe.kml is not None
     validate_xml(safe.kml.path, support_dir / 's1-map-overlay.xsd')
+    assert safe.preview.path is not None
     validate_xml(safe.preview.path, support_dir / 's1-product-preview.xsd')
     for swath in safe.swaths:
         validate_xml(swath.product.path, support_dir / 's1-level-1-product.xsd')

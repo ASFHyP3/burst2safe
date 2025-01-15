@@ -10,6 +10,7 @@ class TestProduct:
         product = Product(burst_infos, '3.71', 1)
         product.assemble()
         product.update_data_stats(1 + 2j, 3 + 4j)
+        assert product.xml is not None
         for elem in [product.image_annotation, product.xml.find('imageAnnotation')]:
             elem.find(f'{base_path}Mean/re').text = '1'
             elem.find(f'{base_path}Mean/im').text = '2'
@@ -48,6 +49,7 @@ class TestProduct:
 
         # Add back in omitted fields
         product.update_data_stats(1 + 1j, 2 + 2j)
+        assert product.xml is not None
         burst_elems = product.xml.findall('.//byteOffset')
         for burst_elem in burst_elems:
             burst_elem.text = '1'

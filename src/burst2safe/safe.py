@@ -4,8 +4,9 @@ from collections.abc import Iterable
 from datetime import datetime
 from itertools import product
 from pathlib import Path
-from typing import List, Optional, Tuple
+from typing import List, Optional, Tuple, Union, cast
 
+import lxml.etree as ET
 import numpy as np
 from shapely.geometry import MultiPolygon, Polygon
 
@@ -19,7 +20,9 @@ from burst2safe.utils import BurstInfo, drop_duplicates, flatten, get_subxml_fro
 class Safe:
     """Class representing a SAFE file."""
 
-    def __init__(self, burst_infos: Iterable[BurstInfo], all_anns: bool = False, work_dir: Optional[Path] = None):
+    def __init__(
+        self, burst_infos: list[BurstInfo], all_anns: bool = False, work_dir: Optional[Union[Path, str]] = None
+    ):
         """Initialize a Safe object.
 
         Args:
@@ -36,10 +39,10 @@ class Safe:
         self.grouped_burst_infos = self.group_burst_infos(self.burst_infos)
         self.name = self.get_name()
         self.safe_path = self.work_dir / self.name
-        self.swaths = []
-        self.blank_products = []
-        self.manifest = None
-        self.kml = None
+        self.swaths: list = []
+        self.blank_products: list = []
+        self.manifest: Optional[ET.Element] = None
+        self.kml: Optional[Kml] = None
 
         self.version = self.get_ipf_version(self.burst_infos[0].metadata_path)
         self.major_version, self.minor_version = [int(x) for x in self.version.split('.')]
@@ -93,7 +96,7 @@ class Safe:
         """
         swaths = sorted(list(set([info.swath for info in burst_infos])))
         polarizations = sorted(list(set([info.polarization for info in burst_infos])))
-        burst_range = {}
+        burst_range: dict = {}
         for swath in swaths:
             burst_range[swath] = {}
             for pol in polarizations:
@@ -103,7 +106,7 @@ class Safe:
                     continue
                 Swath.check_burst_group_validity(burst_subset)
 
-                burst_ids = [info.burst_id for info in burst_subset]
+                burst_ids = [cast(int, info.burst_id) for info in burst_subset]
                 burst_range[swath][pol] = [min(burst_ids), max(burst_ids)]
 
             start_ids = [id_range[0] for id_range in burst_range[swath].values()]
@@ -139,6 +142,7 @@ class Safe:
         Returns:
             The name of the SAFE file
         """
+        assert self.burst_infos[0].slc_granule is not None
         platform, beam_mode, product_type = self.burst_infos[0].slc_granule.split('_')[:3]
 
         pol_codes = {'HH': 'SH', 'VV': 'SV', 'VH': 'SV', 'HV': 'SV', 'HH_HV': 'DH', 'VH_VV': 'DV'}
@@ -146,8 +150,8 @@ class Safe:
         pol_code = pol_codes['_'.join(pols)]
         product_info = f'1S{pol_code}'
 
-        min_date = min([x.date for x in self.burst_infos]).strftime('%Y%m%dT%H%M%S')
-        max_date = max([x.date for x in self.burst_infos]).strftime('%Y%m%dT%H%M%S')
+        min_date = min(cast(datetime, x.date) for x in self.burst_infos).strftime('%Y%m%dT%H%M%S')
+        max_date = max(cast(datetime, x.date) for x in self.burst_infos).strftime('%Y%m%dT%H%M%S')
         absolute_orbit = f'{self.burst_infos[0].absolute_orbit:06d}'
         mission_data_take = self.burst_infos[0].slc_granule.split('_')[-2]
         product_name = f'{platform}_{beam_mode}_{product_type}__{product_info}_{min_date}_{max_date}_{absolute_orbit}_{mission_data_take}_{unique_id}.SAFE'
@@ -163,7 +167,7 @@ class Safe:
         Returns:
             A dictionary of burst infos grouped by swath, then polarization
         """
-        burst_dict = {}
+        burst_dict: dict = {}
         for burst_info in burst_infos:
             if burst_info.swath not in burst_dict:
                 burst_dict[burst_info.swath] = {}
@@ -202,11 +206,11 @@ class Safe:
         bbox = Polygon(min_rotated_rect.exterior)
         return bbox
 
-    def create_dir_structure(self) -> Path:
+    def create_dir_structure(self) -> None:
         """Create a directory for the SAFE file.
 
         Returns:
-            The path to the SAFE directory
+            None
         """
         measurements_dir = self.safe_path / 'measurement'
         annotations_dir = self.safe_path / 'annotation'
@@ -237,8 +241,8 @@ class Safe:
         representative_bursts = []
         for slc in unique_slcs:
             slc_bursts = [x for x in template_bursts if x.slc_granule == slc]
-            start_utc = min([x.start_utc for x in slc_bursts])
-            stop_utc = max([x.stop_utc for x in slc_bursts])
+            start_utc = min(cast(datetime, x.start_utc) for x in slc_bursts)
+            stop_utc = max(cast(datetime, x.stop_utc) for x in slc_bursts)
             slc_template = slc_bursts[0]
             new_burst = BurstInfo(
                 None,
@@ -307,7 +311,9 @@ class Safe:
             blank_product.write(product_name)
             self.blank_products.append(blank_product)
 
-    def add_preview_components(self, content_units: List, metadata_objects: List, data_objects: List) -> List:
+    def add_preview_components(
+        self, content_units: list, metadata_objects: list, data_objects: list
+    ) -> tuple[list, list, list]:
         """Add the preview components to unit lists.
 
         Args:
@@ -328,7 +334,10 @@ class Safe:
 
         metadata_objects += [create_metadata_object('mapoverlay'), create_metadata_object('productpreview')]
 
-        # TOOD: add quciklook data object someday
+        assert self.kml is not None
+        assert self.kml.size_bytes is not None
+        assert self.kml.md5 is not None
+        # TODO: add quicklook data object someday
         overlay_data_object = create_data_object(
             'mapoverlay',
             './preview/map-overlay.kml',
@@ -407,6 +416,7 @@ class Safe:
 
     def update_product_identifier(self) -> None:
         """Update the product identifier using the CRC of the manifest file."""
+        assert self.manifest is not None
         new_new = self.get_name(unique_id=self.manifest.crc)
         new_path = self.work_dir / new_new
         if new_path.exists():
@@ -416,6 +426,7 @@ class Safe:
         self.name = new_new
         self.safe_path = new_path
 
+        assert self.kml is not None
         self.kml.update_path(self.safe_path)
         self.preview.update_path(self.safe_path)
         for swath in self.swaths:
@@ -436,4 +447,5 @@ class Safe:
         to_delete += [burst_info.metadata_path for burst_info in self.burst_infos]
         to_delete = drop_duplicates(to_delete)
         for file in to_delete:
+            assert file is not None
             file.unlink()

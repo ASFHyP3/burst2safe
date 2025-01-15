@@ -3,7 +3,7 @@
 from argparse import ArgumentParser
 from datetime import datetime
 from pathlib import Path
-from typing import Iterable, List, Optional
+from typing import List, Optional
 
 from shapely.geometry import Polygon
 
@@ -25,8 +25,8 @@ def burst2stack(
     start_date: Optional[datetime] = None,
     end_date: Optional[datetime] = None,
     extent: Optional[Polygon] = None,
-    polarizations: Optional[Iterable[str]] = None,
-    swaths: Optional[Iterable[str]] = None,
+    polarizations: Optional[list[str]] = None,
+    swaths: Optional[list[str]] = None,
     mode: str = 'IW',
     min_bursts: int = 1,
     all_anns: bool = False,

@@ -84,7 +84,7 @@ def test_sort_burst_infos():
     info8 = StubInfo('IW2', 'HH', 2)
     infos = [info1, info3, info5, info2, info8, info4, info6, info7]
 
-    sorted_infos = utils.sort_burst_infos(infos)
+    sorted_infos = utils.sort_burst_infos(infos)  # type: ignore[arg-type]
 
     assert sorted_infos['IW1']['VV'] == [info1, info5]
     assert sorted_infos['IW1']['HH'] == [info2, info6]
@@ -189,21 +189,21 @@ def test_reparse_args_burst2safe():
 
     args1 = MockArgs(granules=['granule1', 'granule2'], orbit=123)
     with pytest.raises(ValueError, match='Cannot provide*'):
-        utils.reparse_args(args1, 'burst2safe')
+        utils.reparse_args(args1, 'burst2safe')  # type: ignore[arg-type]
 
     args2 = MockArgs(orbit=123)
     with pytest.raises(ValueError, match='Must provide*'):
-        utils.reparse_args(args2, 'burst2safe')
+        utils.reparse_args(args2, 'burst2safe')  # type: ignore[arg-type]
 
     args3 = MockArgs(orbit=123, extent=['0', '0', '1', '1'], pols=['vv'], swaths=['iw1'])
-    out_args = utils.reparse_args(args3, 'burst2safe')
+    out_args = utils.reparse_args(args3, 'burst2safe')  # type: ignore[arg-type]
     assert out_args.pols == ['VV']
     assert out_args.swaths == ['IW1']
     assert out_args.extent == box(*[0, 0, 1, 1])
 
     granules = ['S1_136231_IW2_20200604T022312_VV_7C85-BURST', 'S1_136232_IW2_20200604T022315_VV_7C85-BURST']
     args4 = MockArgs(granules=granules)
-    out_args = utils.reparse_args(args4, 'burst2safe')
+    out_args = utils.reparse_args(args4, 'burst2safe')  # type: ignore[arg-type]
     assert out_args.granules == granules
 
 
@@ -214,7 +214,7 @@ def test_reparse_args_burst2stack():
 
     args1 = MockArgs(rel_orb=123)
     with pytest.raises(ValueError, match='Must provide*'):
-        utils.reparse_args(args1, 'burst2stack')
+        utils.reparse_args(args1, 'burst2stack')  # type: ignore[arg-type]
 
     args2 = MockArgs(
         rel_orbit=123,
@@ -224,7 +224,7 @@ def test_reparse_args_burst2stack():
         pols=['vv'],
         swaths=['iw1'],
     )
-    out_args = utils.reparse_args(args2, 'burst2stack')
+    out_args = utils.reparse_args(args2, 'burst2stack')  # type: ignore[arg-type]
     assert out_args.start_date == datetime.fromisoformat('2021-01-01')
     assert out_args.end_date == datetime.fromisoformat('2021-02-01')
     assert out_args.pols == ['VV']

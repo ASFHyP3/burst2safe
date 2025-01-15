@@ -6,7 +6,7 @@ from collections.abc import Iterable
 from dataclasses import dataclass
 from datetime import datetime, timedelta
 from pathlib import Path
-from typing import Dict, List, Optional
+from typing import Dict, List, Optional, Union
 
 import lxml.etree as ET
 from asf_search.Products.S1BurstProduct import S1BurstProduct
@@ -22,24 +22,24 @@ warnings.filterwarnings('ignore')
 class BurstInfo:
     """Dataclass for storing burst information."""
 
-    granule: str
-    slc_granule: str
+    granule: Optional[str]
+    slc_granule: Optional[str]
     swath: str
     polarization: str
-    burst_id: int
+    burst_id: Optional[int]
     burst_index: int
     direction: str
     absolute_orbit: int
     relative_orbit: int
-    date: datetime
-    data_url: Path
-    data_path: Path
-    metadata_url: Path
+    date: Optional[datetime]
+    data_url: Optional[str]
+    data_path: Optional[Path]
+    metadata_url: Optional[str]
     metadata_path: Path
-    start_utc: datetime = None
-    stop_utc: datetime = None
-    length: int = None
-    width: int = None
+    start_utc: Optional[datetime] = None
+    stop_utc: Optional[datetime] = None
+    length: Optional[int] = None
+    width: Optional[int] = None
 
     def add_shape_info(self):
         """Add shape information to the BurstInfo object."""
@@ -56,6 +56,7 @@ class BurstInfo:
         self.start_utc = start_utcs[self.burst_index]
 
         azimuth_time_interval = float(annotation.find('.//azimuthTimeInterval').text)
+        assert self.length is not None
         burst_time_interval = timedelta(seconds=(self.length - 1) * azimuth_time_interval)
         self.stop_utc = self.start_utc + burst_time_interval
 
@@ -106,12 +107,12 @@ def create_burst_info(product: S1BurstProduct, work_dir: Path) -> BurstInfo:
     return burst_info
 
 
-def get_burst_infos(products: Iterable[S1BurstProduct], work_dir: Path) -> List[BurstInfo]:
+def get_burst_infos(products: Iterable[S1BurstProduct], work_dir: Optional[Path]) -> List[BurstInfo]:
     """Get burst information from ASF Search.
 
     Args:
         products: A list of S1BurstProduct objects.
-        save_dir: The directory to save the data to.
+        work_dir: The directory to save the data to.
 
     Returns:
         A list of BurstInfo objects.
@@ -134,7 +135,7 @@ def sort_burst_infos(burst_info_list: List[BurstInfo]) -> Dict:
     Returns:
         Dictionary of sorted BurstInfo objects. First key is swath, second key is polarization.
     """
-    burst_infos = {}
+    burst_infos: dict = {}
     for burst_info in burst_info_list:
         if burst_info.swath not in burst_infos:
             burst_infos[burst_info.swath] = {}
@@ -152,7 +153,7 @@ def sort_burst_infos(burst_info_list: List[BurstInfo]) -> Dict:
     return burst_infos
 
 
-def optional_wd(wd: Optional[str] = None) -> Path:
+def optional_wd(wd: Optional[Union[Path, str]] = None) -> Path:
     """Return the working directory as a Path object
 
     Args:
@@ -161,9 +162,7 @@ def optional_wd(wd: Optional[str] = None) -> Path:
     Returns:
         Path to your input working directory or the current working directory.
     """
-    if wd is None:
-        wd = Path.cwd()
-    return Path(wd).resolve()
+    return Path(wd).resolve() if wd is not None else Path.cwd()
 
 
 def calculate_crc16(file_path: Path) -> str:
@@ -178,12 +177,12 @@ def calculate_crc16(file_path: Path) -> str:
     with open(file_path, 'rb') as f:
         data = f.read()
 
-    crc = f'{crc_hqx(data, 0xffff):04X}'
+    crc = f'{crc_hqx(data, 0xFFFF):04X}'
     return crc
 
 
 def get_subxml_from_metadata(
-    metadata_path: Path, xml_type: str, subswath: str = None, polarization: str = None
+    metadata_path: Path, xml_type: str, subswath: Optional[str] = None, polarization: Optional[str] = None
 ) -> ET.Element:
     """Extract child xml info from ASF combined metadata file.
 
@@ -232,7 +231,7 @@ def drop_duplicates(input_list: List) -> List:
     return list(dict.fromkeys(input_list))
 
 
-def set_text(element: ET.Element, text: str) -> None:
+def set_text(element: ET.Element, text: Union[str, int]) -> None:
     """Set the text of an element if it is not None.
 
     Args:

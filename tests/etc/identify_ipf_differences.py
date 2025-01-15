@@ -2,6 +2,7 @@ import os
 import shutil
 from datetime import datetime
 from pathlib import Path
+from typing import cast
 from zipfile import ZipFile
 
 import asf_search as asf
@@ -49,12 +50,12 @@ def find_representative_bursts(important_only=False):
         'maxResults': 2000,
     }
     results = asf.search(**options)
-    bursts = sorted(get_burst_infos(results, Path.cwd()), key=lambda x: x.date)
+    bursts = sorted(get_burst_infos(results, Path.cwd()), key=lambda x: cast(datetime, x.date))
     mid_bursts = []
     for i in range(len(VERSIONS) - 1):
         date1 = VERSIONS[i][1]
         date2 = VERSIONS[i + 1][1]
-        bursts_between = [burst for burst in bursts if date1 <= burst.date < date2]
+        bursts_between = [burst for burst in bursts if date1 <= cast(datetime, burst.date) < date2]
         mid_index = int(np.floor(len(bursts_between) / 2))
         mid_burst = bursts_between[mid_index]
         if important_only:
@@ -67,12 +68,12 @@ def find_representative_bursts(important_only=False):
 
 def download_slcs():
     slcs = [f'{burst.slc_granule}-SLC' for burst in find_representative_bursts()]
-    slcs = asf.granule_search(slcs)
-    slcs.download('.')
+    slc_results = asf.granule_search(slcs)
+    slc_results.download('.')
 
 
 def get_version(slc_path):
-    slc_name = f"{slc_path.name.split('.')[0]}.SAFE"
+    slc_name = f'{slc_path.name.split(".")[0]}.SAFE'
     with ZipFile(slc_path) as z:
         manifest_str = z.read(f'{slc_name}/manifest.safe')
         manifest = ET.fromstring(manifest_str)
@@ -90,7 +91,7 @@ def extract_support_folder(slc_path):
     version = get_version(slc_path).replace('.', '')
     out_dir = Path(f'support_{version}')
     out_dir.mkdir(exist_ok=True)
-    slc_name = f"{slc_path.name.split('.')[0]}.SAFE"
+    slc_name = f'{slc_path.name.split(".")[0]}.SAFE'
     with ZipFile(slc_path) as zip_ref:
         for file_info in zip_ref.infolist():
             if file_info.filename.startswith(f'{slc_name}/support/') and not file_info.is_dir():
@@ -134,8 +135,8 @@ def download_changing_metadata():
 
 def download_representative_support():
     slcs = [f'{burst.slc_granule}-SLC' for burst in find_representative_bursts(important_only=True)]
-    slcs = asf.granule_search(slcs)
-    slcs.download('.')
+    slc_results = asf.granule_search(slcs)
+    slc_results.download('.')
     slc_paths = sorted(list(Path().glob('*.zip')))
     for slc_path in slc_paths:
         extract_support_folder(slc_path)

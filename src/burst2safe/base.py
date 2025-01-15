@@ -1,9 +1,8 @@
 import hashlib
-from collections.abc import Iterable
 from copy import deepcopy
 from datetime import datetime, timedelta
 from pathlib import Path
-from typing import List, Optional
+from typing import List, Optional, Union, cast
 
 import lxml.etree as ET
 
@@ -24,9 +23,9 @@ class ListOfListElements:
             start_line: The starting line number of the first element.
             slc_lengths: The total line lengths of the SLCs corresponding to each element.
         """
-        self.inputs = inputs
-        self.start_line = start_line
-        self.slc_lengths = slc_lengths
+        self.inputs: list[ET.Element] = inputs
+        self.start_line: Optional[int] = start_line
+        self.slc_lengths: Optional[list[int]] = slc_lengths
 
         self.name = self.inputs[0].tag
         elements = flatten([element.findall('*') for element in self.inputs])
@@ -75,6 +74,7 @@ class ListOfListElements:
         last_time = datetime.fromisoformat(list_of_element_lists[0][-1].find(self.time_field).text)
         uniques = [deepcopy(element) for element in list_of_element_lists[0]]
         if self.has_line:
+            assert self.slc_lengths is not None
             previous_line_count = self.slc_lengths[0]
 
         for i, element_list in enumerate(list_of_element_lists[1:]):
@@ -84,7 +84,9 @@ class ListOfListElements:
 
             if self.has_line:
                 new_lines = [int(elem.find('line').text) + previous_line_count for elem in to_keep]
-                [set_text(elem.find('line'), line) for elem, line in zip(to_keep, new_lines)]
+                for elem, line in zip(to_keep, new_lines):
+                    set_text(elem.find('line'), line)
+                assert self.slc_lengths is not None
                 previous_line_count += self.slc_lengths[i]
 
             last_time = max([times[index] for index in keep_index])
@@ -116,10 +118,11 @@ class ListOfListElements:
         """
         for element in elements:
             standard_line = int(element.find('line').text)
+            assert self.start_line is not None
             element.find('line').text = str(standard_line - self.start_line)
 
     def filter_by_time(
-        self, elements: List[ET.Element], anx_bounds: tuple[float, float], buffer: timedelta
+        self, elements: List[ET.Element], anx_bounds: tuple[datetime, datetime], buffer: timedelta
     ) -> List[ET.Element]:
         """Filter elements by time.
 
@@ -143,8 +146,8 @@ class ListOfListElements:
 
     def create_filtered_list(
         self,
-        anx_bounds: Optional[tuple[float, float]],
-        buffer: Optional[timedelta] = timedelta(seconds=3),
+        anx_bounds: tuple[datetime, datetime],
+        buffer: timedelta = timedelta(seconds=3),
         line_bounds: Optional[tuple[float, float]] = None,
     ) -> ET.Element:
         """Filter elements by time/line. Adjust line number if present.
@@ -210,7 +213,7 @@ def create_metadata_object(simple_name: str) -> ET.Element:
 
 
 def create_data_object(
-    simple_name: str, relative_path: Path, rep_id: str, mime_type: str, size_bytes: int, md5: str
+    simple_name: str, relative_path: Union[Path, str], rep_id: str, mime_type: str, size_bytes: int, md5: str
 ) -> ET.Element:
     """Create a data object element for a manifest.safe file.
 
@@ -241,7 +244,7 @@ def create_data_object(
 
 
 class Annotation:
-    def __init__(self, burst_infos: Iterable[BurstInfo], metadata_type: str, ipf_version: str, image_number: int):
+    def __init__(self, burst_infos: list[BurstInfo], metadata_type: str, ipf_version: str, image_number: int):
         """Initialize the Annotation object.
 
         Args:
@@ -256,11 +259,12 @@ class Annotation:
         self.major_version, self.minor_version = [int(v) for v in ipf_version.split('.')]
         self.metadata_paths = drop_duplicates([x.metadata_path for x in burst_infos])
         self.swath, self.pol = burst_infos[0].swath, burst_infos[0].polarization
+        assert burst_infos[0].length is not None
         self.start_line = burst_infos[0].burst_index * burst_infos[0].length
         self.total_lines = len(burst_infos) * burst_infos[0].length
         self.stop_line = self.start_line + self.total_lines
-        self.min_anx = min([x.start_utc for x in burst_infos])
-        self.max_anx = max([x.stop_utc for x in burst_infos])
+        self.min_anx = min(cast(datetime, x.start_utc) for x in burst_infos)
+        self.max_anx = max(cast(datetime, x.stop_utc) for x in burst_infos)
 
         self.inputs = [
             get_subxml_from_metadata(path, metadata_type, self.swath, self.pol) for path in self.metadata_paths
@@ -276,11 +280,11 @@ class Annotation:
 
         # annotation components to be extended by subclasses
         self.ads_header = None
-        self.xml = None
+        self.xml: Optional[ET.Element] = None
 
         # these attributes are updated when the annotation is written to a file
-        self.size_bytes = None
-        self.md5 = None
+        self.size_bytes: Optional[int] = None
+        self.md5: Optional[str] = None
 
     def create_ads_header(self):
         """Create the ADS header for the annotation."""
@@ -301,7 +305,7 @@ class Annotation:
         """
         list_elements = [input_xml.find(list_name) for input_xml in self.inputs]
         list_of_list_elements = ListOfListElements(list_elements, self.start_line, self.slc_lengths)
-        merged_list = list_of_list_elements.create_filtered_list([self.min_anx, self.max_anx], line_bounds=line_bounds)
+        merged_list = list_of_list_elements.create_filtered_list((self.min_anx, self.max_anx), line_bounds=line_bounds)
         return merged_list
 
     def write(self, out_path: Path, update_info=True) -> None:
@@ -311,6 +315,7 @@ class Annotation:
             out_path: The path to write the annotation to.
             update_info: Whether to update the size and md5 attributes of the annotation.
         """
+        assert self.xml is not None
         self.xml.write(out_path, pretty_print=True, xml_declaration=True, encoding='utf-8')
 
         if update_info:
@@ -345,6 +350,11 @@ class Annotation:
 
         content_unit = create_content_unit(simple_name, unit_type, rep_id)
         metadata_object = create_metadata_object(simple_name)
+        assert self.size_bytes is not None
+        assert self.md5 is not None
         data_object = create_data_object(simple_name, rel_path, rep_id, mime_type, self.size_bytes, self.md5)
 
         return content_unit, metadata_object, data_object
+
+    def assemble(self):
+        raise NotImplementedError()
