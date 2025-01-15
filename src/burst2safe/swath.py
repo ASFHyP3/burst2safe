@@ -152,9 +152,9 @@ class Swath:
         Args:
             update_info: Whether to update the bounding box of the Swath
         """
+        self.measurement.write(self.measurement_name)
         assert self.measurement.data_mean is not None
         assert self.measurement.data_std is not None
-        self.measurement.write(self.measurement_name)
         self.product.update_data_stats(self.measurement.data_mean, self.measurement.data_std)
         self.product.update_burst_byte_offsets(self.measurement.byte_offsets)
         self.product.write(self.product_name)
