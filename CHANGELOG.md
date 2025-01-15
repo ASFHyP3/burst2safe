@@ -11,6 +11,9 @@ and uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 ### Added
 * The [`static-analysis`](.github/workflows/static-analysis.yml) workflow now includes `mypy` for type checking.
 
+### Removed
+* Removed `black` from the [`static-analysis`](.github/workflows/static-analysis.yml) workflow.
+
 ### Fixed
 * Add missing [`src/burst2safe/__init__.py`](./src/burst2safe/__init__.py) file.
 
