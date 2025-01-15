@@ -2,6 +2,7 @@ import os
 import shutil
 from datetime import datetime
 from pathlib import Path
+from typing import cast
 from zipfile import ZipFile
 
 import asf_search as asf
@@ -49,12 +50,12 @@ def find_representative_bursts(important_only=False):
         'maxResults': 2000,
     }
     results = asf.search(**options)
-    bursts = sorted(get_burst_infos(results, Path.cwd()), key=lambda x: x.date)
+    bursts = sorted(get_burst_infos(results, Path.cwd()), key=lambda x: cast(datetime, x.date))
     mid_bursts = []
     for i in range(len(VERSIONS) - 1):
         date1 = VERSIONS[i][1]
         date2 = VERSIONS[i + 1][1]
-        bursts_between = [burst for burst in bursts if date1 <= burst.date < date2]
+        bursts_between = [burst for burst in bursts if date1 <= cast(datetime, burst.date) < date2]
         mid_index = int(np.floor(len(bursts_between) / 2))
         mid_burst = bursts_between[mid_index]
         if important_only:

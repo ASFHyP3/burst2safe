@@ -25,25 +25,25 @@ class TestSafe:
         burst2 = BurstStub(granule='S1A_20210101_1_VV', absolute_orbit=1, swath='IW2', polarization='VV', burst_id=1)
         burst4 = BurstStub(granule='S1A_20210101_1_VH', absolute_orbit=1, swath='IW2', polarization='VH', burst_id=1)
 
-        Safe.check_group_validity([burst1, burst2, burst3, burst4])
+        Safe.check_group_validity([burst1, burst2, burst3, burst4])  # type: ignore[list-item]
 
         burst_start = BurstStub(
             granule='S1A_IW_SLC_20210101_0_VH', absolute_orbit=1, swath='IW1', polarization='VH', burst_id=0
         )
         different_polarization_starts = [burst_start, burst1, burst3, burst5, burst6]
         with pytest.raises(ValueError, match='Polarization groups in swath .* start burst id.*'):
-            Safe.check_group_validity(different_polarization_starts)
+            Safe.check_group_validity(different_polarization_starts)  # type: ignore[arg-type]
 
         burst_end = BurstStub(
             granule='S1A_IW_SLC_20210101_3_VH', absolute_orbit=1, swath='IW1', polarization='VH', burst_id=3
         )
         different_polarization_ends = [burst1, burst3, burst5, burst6, burst_end]
         with pytest.raises(ValueError, match='Polarization groups in swath .* end burst id.*'):
-            Safe.check_group_validity(different_polarization_ends)
+            Safe.check_group_validity(different_polarization_ends)  # type: ignore[arg-type]
 
         swath_nonoverlap = [burst1, BurstStub(*burst2._replace(burst_id=3))]
         with pytest.raises(ValueError, match='Products from swaths IW1 and IW2 do not overlap'):
-            Safe.check_group_validity(swath_nonoverlap)
+            Safe.check_group_validity(swath_nonoverlap)  # type: ignore[arg-type]
 
     def test_get_name(self, burst_infos, tmp_path):
         tmp_bursts = [deepcopy(x) for x in burst_infos]
@@ -83,7 +83,7 @@ class TestSafe:
         burst8 = BurstStub(swath='IW2', polarization='VH', burst_id=2)
 
         burst_info_stubs = [burst1, burst2, burst3, burst4, burst5, burst6, burst7, burst8]
-        grouped = Safe.group_burst_infos(burst_info_stubs)
+        grouped = Safe.group_burst_infos(burst_info_stubs)  # type: ignore[arg-type]
         assert grouped['IW1']['VV'] == [burst1, burst3]
         assert grouped['IW1']['VH'] == [burst2, burst4]
         assert grouped['IW2']['VV'] == [burst5, burst7]

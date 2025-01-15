@@ -22,24 +22,24 @@ warnings.filterwarnings('ignore')
 class BurstInfo:
     """Dataclass for storing burst information."""
 
-    granule: str
-    slc_granule: str
+    granule: Optional[str]
+    slc_granule: Optional[str]
     swath: str
     polarization: str
-    burst_id: int
+    burst_id: Optional[int]
     burst_index: int
     direction: str
     absolute_orbit: int
     relative_orbit: int
-    date: datetime
-    data_url: Path
-    data_path: Path
-    metadata_url: Path
+    date: Optional[datetime]
+    data_url: Optional[str]
+    data_path: Optional[Path]
+    metadata_url: Optional[str]
     metadata_path: Path
-    start_utc: Union[datetime, None] = None
-    stop_utc: Union[datetime, None] = None
-    length: Union[int, None] = None
-    width: Union[int, None] = None
+    start_utc: Optional[datetime] = None
+    stop_utc: Optional[datetime] = None
+    length: Optional[int] = None
+    width: Optional[int] = None
 
     def add_shape_info(self):
         """Add shape information to the BurstInfo object."""
@@ -107,17 +107,17 @@ def create_burst_info(product: S1BurstProduct, work_dir: Path) -> BurstInfo:
     return burst_info
 
 
-def get_burst_infos(products: Iterable[S1BurstProduct], work_dir: Path) -> List[BurstInfo]:
+def get_burst_infos(products: Iterable[S1BurstProduct], work_dir: Optional[Path]) -> List[BurstInfo]:
     """Get burst information from ASF Search.
 
     Args:
         products: A list of S1BurstProduct objects.
-        save_dir: The directory to save the data to.
+        work_dir: The directory to save the data to.
 
     Returns:
         A list of BurstInfo objects.
     """
-    work_dir = optional_wd(str(work_dir))
+    work_dir = optional_wd(work_dir)
     burst_info_list = []
     for product in products:
         burst_info = create_burst_info(product, work_dir)
@@ -153,7 +153,7 @@ def sort_burst_infos(burst_info_list: List[BurstInfo]) -> Dict:
     return burst_infos
 
 
-def optional_wd(wd: Optional[str] = None) -> Path:
+def optional_wd(wd: Optional[Union[Path, str]] = None) -> Path:
     """Return the working directory as a Path object
 
     Args:
@@ -162,7 +162,7 @@ def optional_wd(wd: Optional[str] = None) -> Path:
     Returns:
         Path to your input working directory or the current working directory.
     """
-    return Path(wd).resolve() if wd else Path.cwd()
+    return Path(wd).resolve() if wd is not None else Path.cwd()
 
 
 def calculate_crc16(file_path: Path) -> str:
@@ -231,14 +231,14 @@ def drop_duplicates(input_list: List) -> List:
     return list(dict.fromkeys(input_list))
 
 
-def set_text(element: ET.Element, text: str) -> None:
+def set_text(element: ET.Element, text: Union[str, int]) -> None:
     """Set the text of an element if it is not None.
 
     Args:
         element: The element to set the text of.
         text: The text to set the element to.
     """
-    if not isinstance(text, str) and not isinstance(text, int):  # type: ignore [unreachable]
+    if not isinstance(text, str) and not isinstance(text, int):
         raise ValueError('Text must be a string or an integer.')
 
     element.text = str(text)

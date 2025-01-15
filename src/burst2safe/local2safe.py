@@ -4,7 +4,7 @@ import argparse
 import json
 from datetime import datetime
 from pathlib import Path
-from typing import Optional
+from typing import Optional, Union, cast
 
 from burst2safe import utils
 from burst2safe.burst_id import calculate_burstid
@@ -56,8 +56,8 @@ def burst_info_from_local(
     info.add_shape_info()
     info.add_start_stop_utc()
     date_format = '%Y%m%dT%H%M%S'
-    start_utc_str = datetime.strftime(info.start_utc, date_format)
-    info.date = datetime.strptime(datetime.strftime(info.start_utc, date_format), date_format)
+    start_utc_str = datetime.strftime(cast(datetime, info.start_utc), date_format)
+    info.date = datetime.strptime(datetime.strftime(cast(datetime, info.start_utc), date_format), date_format)
     info.granule = f'S1_{burst_id}_{swath}_{start_utc_str}_{polarization}_{slc_name.split("_")[-1]}-BURST'
     return info
 
@@ -110,7 +110,7 @@ def local2safe(
     slc_dict: dict,
     all_anns: bool = False,
     keep_files: bool = False,
-    work_dir: Optional[Path] = None,
+    work_dir: Optional[Union[Path, str]] = None,
 ) -> Path:
     """Convert a set of burst granules to the ESA SAFE format using local files
 

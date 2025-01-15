@@ -2,7 +2,7 @@ from collections.abc import Iterable
 from copy import deepcopy
 from dataclasses import dataclass
 from datetime import timedelta
-from typing import Union
+from typing import Optional, cast
 
 import lxml.etree as ET
 import numpy as np
@@ -25,7 +25,7 @@ class GeoPoint:
 class Product(Annotation):
     """Class representing a product XML."""
 
-    def __init__(self, burst_infos: Iterable[BurstInfo], ipf_version: str, image_number: int, dummy: bool = False):
+    def __init__(self, burst_infos: list[BurstInfo], ipf_version: str, image_number: int, dummy: bool = False):
         """Create a Product object.
 
         Args:
@@ -40,8 +40,8 @@ class Product(Annotation):
         self.image_annotation = None
         self.doppler_centroid = None
         self.antenna_pattern = None
-        self.swath_timing: Union[ET.Element, None] = None
-        self.geolocation_grid: Union[ET.Element, None] = None
+        self.swath_timing: Optional[ET.Element] = None
+        self.geolocation_grid: Optional[ET.Element] = None
         self.coordinate_conversion = None
         self.swath_merging = None
         self.gcps: list = []
@@ -103,7 +103,7 @@ class Product(Annotation):
                 [filtered.append(element) for element in unique]
             else:
                 lol = ListOfListElements(list_elements, self.start_line, self.slc_lengths)
-                filtered = lol.create_filtered_list([self.min_anx, self.max_anx], buffer=timedelta(seconds=500))
+                filtered = lol.create_filtered_list((self.min_anx, self.max_anx), buffer=timedelta(seconds=500))
 
             general_annotation.append(filtered)
 
@@ -152,13 +152,13 @@ class Product(Annotation):
 
         list_elements = [prod.find('imageAnnotation/processingInformation/inputDimensionsList') for prod in self.inputs]
         lol = ListOfListElements(list_elements, self.start_line, self.slc_lengths)
-        filtered = lol.create_filtered_list([self.min_anx, self.max_anx])
+        filtered = lol.create_filtered_list((self.min_anx, self.max_anx))
         [dimensions_list.append(element) for element in filtered]
 
         image_annotation.append(processing_information)
         self.image_annotation = image_annotation
 
-    def update_data_stats(self, data_mean: np.complex64, data_std: np.complex64):
+    def update_data_stats(self, data_mean: complex, data_std: complex):
         """Update the data statistics in the imageAnnotation element.
 
         Args:
@@ -171,6 +171,7 @@ class Product(Annotation):
         data_std_re = f'{data_std.real:.6e}'
         data_std_im = f'{data_std.imag:.6e}'
 
+        assert self.xml is not None
         for elem in [self.image_annotation, self.xml.find('imageAnnotation')]:
             elem.find(f'{base_path}Mean/re').text = data_mean_re
             elem.find(f'{base_path}Mean/im').text = data_mean_im
@@ -193,7 +194,7 @@ class Product(Annotation):
         """Create the swathTiming element."""
         burst_lists = [prod.find('swathTiming/burstList') for prod in self.inputs]
         burst_lol = ListOfListElements(burst_lists, self.start_line, self.slc_lengths)
-        filtered = burst_lol.create_filtered_list([self.min_anx, self.max_anx], buffer=timedelta(seconds=0.1))
+        filtered = burst_lol.create_filtered_list((self.min_anx, self.max_anx), buffer=timedelta(seconds=0.1))
 
         # TODO: This is needed since we always buffer backward AND forward
         if int(filtered.get('count')) > len(self.burst_infos):
@@ -205,9 +206,9 @@ class Product(Annotation):
 
         swath_timing = ET.Element('swathTiming')
         lines_per_burst = ET.SubElement(swath_timing, 'linesPerBurst')
-        lines_per_burst.text = str(max([info.length for info in self.burst_infos]))
+        lines_per_burst.text = str(max(cast(int, info.length) for info in self.burst_infos))
         samples_per_burst = ET.SubElement(swath_timing, 'samplesPerBurst')
-        samples_per_burst.text = str(max([info.width for info in self.burst_infos]))
+        samples_per_burst.text = str(max(cast(int, info.width) for info in self.burst_infos))
         swath_timing.append(filtered)
         self.swath_timing = swath_timing
 
@@ -231,6 +232,7 @@ class Product(Annotation):
         Args:
             byte_offsets: The byte offsets to update
         """
+        assert self.xml is not None
         if self.swath_timing is None or self.xml.find('swathTiming') is None:
             raise ValueError('Product must be assembled before updating burst byte offsets.')
 
@@ -242,7 +244,7 @@ class Product(Annotation):
     def create_geolocation_grid(self):
         """Create the geolocationGrid element."""
         geolocation_grid = ET.Element('geolocationGrid')
-        grid_list = self.merge_lists('geolocationGrid/geolocationGridPointList', line_bounds=[0, self.total_lines])
+        grid_list = self.merge_lists('geolocationGrid/geolocationGridPointList', line_bounds=(0, self.total_lines))
         geolocation_grid.append(grid_list)
         self.geolocation_grid = geolocation_grid
         self.update_gcps()

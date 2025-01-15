@@ -165,18 +165,20 @@ def add_missing_bursts(
     grouped_results = []
     if use_relative_orbit:
         absolute_orbits = list(set([int(result.properties['orbit']) for result in search_results]))
-        group_definitions = product(polarizations, swaths, absolute_orbits)
+        group_definitions: product = product(polarizations, swaths, absolute_orbits)
     else:
-        group_definitions = product(polarizations, swaths)  # type: ignore [assignment]
+        group_definitions = product(polarizations, swaths)
 
     for group_definition in group_definitions:
-        sub_results = get_burst_group(search_results, *group_definition, min_bursts=min_bursts)
+        # false-positive mypy error: "get_burst_group" gets multiple values for keyword argument "min_bursts"
+        # https://github.com/python/mypy/issues/6799
+        sub_results = get_burst_group(search_results, *group_definition, min_bursts=min_bursts)  # type: ignore[misc]
         grouped_results.extend(sub_results)
     return grouped_results
 
 
 def find_group(
-    orbit: int,
+    orbit: Optional[int],
     footprint: Polygon,
     polarizations: Optional[list[str]] = None,
     swaths: Optional[list[str]] = None,

@@ -90,7 +90,7 @@ def test_calculate_burstid_opera_ew():
 
 
 def test_calculate_burstid_opera_badsubsw():
-    bad = EQUATORCROSSER.copy()
-    bad['inputs']['subswath'] = 'NO8'  # type: ignore [index]
+    bad: dict = EQUATORCROSSER.copy()
+    bad['inputs']['subswath'] = 'NO8'
     with raises(burst_id.InvalidModeNameError):
         burstid_calc(bad)

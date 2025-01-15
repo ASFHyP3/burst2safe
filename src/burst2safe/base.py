@@ -2,7 +2,7 @@ import hashlib
 from copy import deepcopy
 from datetime import datetime, timedelta
 from pathlib import Path
-from typing import List, Optional, Union
+from typing import List, Optional, Union, cast
 
 import lxml.etree as ET
 
@@ -24,8 +24,8 @@ class ListOfListElements:
             slc_lengths: The total line lengths of the SLCs corresponding to each element.
         """
         self.inputs: list[ET.Element] = inputs
-        self.start_line: Union[int, None] = start_line
-        self.slc_lengths: Union[list[int], None] = slc_lengths
+        self.start_line: Optional[int] = start_line
+        self.slc_lengths: Optional[list[int]] = slc_lengths
 
         self.name = self.inputs[0].tag
         elements = flatten([element.findall('*') for element in self.inputs])
@@ -84,7 +84,8 @@ class ListOfListElements:
 
             if self.has_line:
                 new_lines = [int(elem.find('line').text) + previous_line_count for elem in to_keep]
-                [set_text(elem.find('line'), line) for elem, line in zip(to_keep, new_lines)]
+                for elem, line in zip(to_keep, new_lines):
+                    set_text(elem.find('line'), line)
                 assert self.slc_lengths is not None
                 previous_line_count += self.slc_lengths[i]
 
@@ -121,7 +122,7 @@ class ListOfListElements:
             element.find('line').text = str(standard_line - self.start_line)
 
     def filter_by_time(
-        self, elements: List[ET.Element], anx_bounds: tuple[float, float], buffer: timedelta
+        self, elements: List[ET.Element], anx_bounds: tuple[datetime, datetime], buffer: timedelta
     ) -> List[ET.Element]:
         """Filter elements by time.
 
@@ -133,8 +134,8 @@ class ListOfListElements:
         Returns:
             A filtered element list.
         """
-        min_anx_bound = anx_bounds[0] - buffer  # type: ignore [operator]
-        max_anx_bound = anx_bounds[1] + buffer  # type: ignore [operator]
+        min_anx_bound = anx_bounds[0] - buffer
+        max_anx_bound = anx_bounds[1] + buffer
         filtered_elements = []
         for element in elements:
             azimuth_time = datetime.fromisoformat(element.find(self.time_field).text)
@@ -145,7 +146,7 @@ class ListOfListElements:
 
     def create_filtered_list(
         self,
-        anx_bounds: tuple[float, float],
+        anx_bounds: tuple[datetime, datetime],
         buffer: timedelta = timedelta(seconds=3),
         line_bounds: Optional[tuple[float, float]] = None,
     ) -> ET.Element:
@@ -212,7 +213,7 @@ def create_metadata_object(simple_name: str) -> ET.Element:
 
 
 def create_data_object(
-    simple_name: str, relative_path: Path, rep_id: str, mime_type: str, size_bytes: int, md5: str
+    simple_name: str, relative_path: Union[Path, str], rep_id: str, mime_type: str, size_bytes: int, md5: str
 ) -> ET.Element:
     """Create a data object element for a manifest.safe file.
 
@@ -258,11 +259,12 @@ class Annotation:
         self.major_version, self.minor_version = [int(v) for v in ipf_version.split('.')]
         self.metadata_paths = drop_duplicates([x.metadata_path for x in burst_infos])
         self.swath, self.pol = burst_infos[0].swath, burst_infos[0].polarization
+        assert burst_infos[0].length is not None
         self.start_line = burst_infos[0].burst_index * burst_infos[0].length
         self.total_lines = len(burst_infos) * burst_infos[0].length
         self.stop_line = self.start_line + self.total_lines
-        self.min_anx = min([x.start_utc for x in burst_infos])
-        self.max_anx = max([x.stop_utc for x in burst_infos])
+        self.min_anx = min(cast(datetime, x.start_utc) for x in burst_infos)
+        self.max_anx = max(cast(datetime, x.stop_utc) for x in burst_infos)
 
         self.inputs = [
             get_subxml_from_metadata(path, metadata_type, self.swath, self.pol) for path in self.metadata_paths
@@ -278,11 +280,11 @@ class Annotation:
 
         # annotation components to be extended by subclasses
         self.ads_header = None
-        self.xml: Union[ET.Element, None] = None
+        self.xml: Optional[ET.Element] = None
 
         # these attributes are updated when the annotation is written to a file
-        self.size_bytes: Union[int, None] = None
-        self.md5: Union[str, None] = None
+        self.size_bytes: Optional[int] = None
+        self.md5: Optional[str] = None
 
     def create_ads_header(self):
         """Create the ADS header for the annotation."""
@@ -353,3 +355,6 @@ class Annotation:
         data_object = create_data_object(simple_name, rel_path, rep_id, mime_type, self.size_bytes, self.md5)
 
         return content_unit, metadata_object, data_object
+
+    def assemble(self):
+        raise NotImplementedError()

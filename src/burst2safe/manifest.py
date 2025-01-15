@@ -1,7 +1,7 @@
 import hashlib
 from copy import deepcopy
 from pathlib import Path
-from typing import List, Union
+from typing import List, Optional
 
 import lxml.etree as ET
 import numpy as np
@@ -73,11 +73,11 @@ class Manifest:
 
         # Updated by methods
         self.information_package_map = None
-        self.metadata_section: Union[ET.Element, None] = None
-        self.data_object_section: Union[ET.Element, None] = None
-        self.xml: Union[ET.Element, None] = None
-        self.path: Union[Path, None] = None
-        self.crc = None
+        self.metadata_section: Optional[ET.Element] = None
+        self.data_object_section: Optional[ET.Element] = None
+        self.xml: Optional[ET.Element] = None
+        self.path: Optional[Path] = None
+        self.crc: Optional[str] = None
 
     def create_information_package_map(self):
         """Create the information package map."""
@@ -174,7 +174,7 @@ class Kml:
             bbox: The bounding box of the product
         """
         self.bbox = bbox
-        self.xml: Union[ET.Element, None] = None
+        self.xml: Optional[ET.Element] = None
 
     def assemble(self):
         """Assemble the components of the SAFE KML preview file."""
@@ -268,8 +268,8 @@ class Preview:
         ]
         if len(self.rfi) > 0:
             self.support.append('s1-level-1-rfi.xsd')
-        self.html: Union[ET.Element, None] = None
-        self.path: Union[Path, None] = None
+        self.html: Optional[ET.Element] = None
+        self.path: Optional[Path] = None
 
     def create_base(self):
         """Create the base HTML product preview."""

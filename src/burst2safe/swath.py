@@ -1,6 +1,7 @@
 from collections.abc import Iterable
 from datetime import datetime
 from pathlib import Path
+from typing import cast
 
 from shapely.geometry import MultiPoint, Polygon
 
@@ -33,7 +34,7 @@ class Swath:
             image_number: The image number of the swath
         """
         self.check_burst_group_validity(burst_infos)
-        self.burst_infos = sorted(burst_infos, key=lambda x: x.burst_id)
+        self.burst_infos = sorted(burst_infos, key=lambda x: cast(int, x.burst_id))
         self.safe_path = safe_path
         self.version = version
         self.creation_time = creation_time
@@ -89,7 +90,7 @@ class Swath:
         if len(polarizations) != 1:
             raise ValueError(f'All bursts must have the same polarization. Found: {polarizations}.')
 
-        burst_ids = [x.burst_id for x in burst_infos]
+        burst_ids = [cast(int, x.burst_id) for x in burst_infos]
         burst_ids.sort()
         if burst_ids != list(range(min(burst_ids), max(burst_ids) + 1)):
             raise ValueError(f'All bursts must have consecutive burst IDs. Found: {burst_ids}.')
@@ -108,8 +109,8 @@ class Swath:
         """
         swath = burst_infos[0].swath.lower()
         pol = burst_infos[0].polarization.lower()
-        start = datetime.strftime(min([x.start_utc for x in burst_infos]), '%Y%m%dt%H%M%S')
-        stop = datetime.strftime(max([x.stop_utc for x in burst_infos]), '%Y%m%dt%H%M%S')
+        start = datetime.strftime(min(cast(datetime, x.start_utc) for x in burst_infos), '%Y%m%dt%H%M%S')
+        stop = datetime.strftime(max(cast(datetime, x.stop_utc) for x in burst_infos), '%Y%m%dt%H%M%S')
 
         safe_name = safe_path.name
         platfrom, _, _, _, _, _, _, orbit, data_take, _ = safe_name.lower().split('_')
@@ -151,6 +152,8 @@ class Swath:
         Args:
             update_info: Whether to update the bounding box of the Swath
         """
+        assert self.measurement.data_mean is not None
+        assert self.measurement.data_std is not None
         self.measurement.write(self.measurement_name)
         self.product.update_data_stats(self.measurement.data_mean, self.measurement.data_std)
         self.product.update_burst_byte_offsets(self.measurement.byte_offsets)
@@ -158,6 +161,7 @@ class Swath:
         self.noise.write(self.noise_name)
         self.calibration.write(self.calibration_name)
         if self.has_rfi:
+            assert self.rfi_name is not None
             self.rfi.write(self.rfi_name)
 
         if update_info:

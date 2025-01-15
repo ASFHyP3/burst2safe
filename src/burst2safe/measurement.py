@@ -1,11 +1,11 @@
 import hashlib
 from datetime import datetime
 from pathlib import Path
-from typing import Tuple, Union
+from typing import Optional, Tuple, cast
 
 import numpy as np
 from osgeo import gdal, osr
-from tifffile import TiffFile
+from tifffile import TiffFile, TiffPage
 
 from burst2safe.base import create_content_unit, create_data_object
 from burst2safe.product import GeoPoint
@@ -39,21 +39,22 @@ class Measurement:
         self.image_number = image_number
 
         self.swath = self.burst_infos[0].swath
+        assert self.burst_infos[0].slc_granule is not None
         self.s1_platform = self.burst_infos[0].slc_granule[2].upper()
 
-        burst_lengths = sorted(list(set([info.length for info in burst_infos])))
+        burst_lengths = sorted(list(set(cast(int, info.length) for info in burst_infos)))
         if len(burst_lengths) != 1:
             raise ValueError(f'All burst are not the same length. Found {" ".join([str(x) for x in burst_lengths])}')
         self.burst_length = burst_lengths[0]
         self.total_length = self.burst_length * len(self.burst_infos)
 
         # TODO: sometimes bursts from different SLCs have different widths. Is this an issue?
-        self.total_width = max([info.width for info in burst_infos])
+        self.total_width = max(cast(int, info.width) for info in burst_infos)
 
-        self.data_mean = None
-        self.data_std = None
-        self.size_bytes: Union[int, None] = None
-        self.md5: Union[str, None] = None
+        self.data_mean: Optional[complex] = None
+        self.data_std: Optional[complex] = None
+        self.size_bytes: Optional[int] = None
+        self.md5: Optional[str] = None
         self.byte_offsets: list = []
 
     def get_data(self, band: int = 1) -> np.ndarray:
@@ -79,11 +80,12 @@ class Measurement:
             if len(tif.pages) != 1:
                 raise ValueError('Byte offset calculation only valid for GeoTIFFs with one band.')
             page = tif.pages[0]
+            assert isinstance(page, TiffPage)
 
-            if page.compression._name_ != 'NONE':  # type: ignore [attr-defined]
+            if page.compression._name_ != 'NONE':  # type: ignore[attr-defined]
                 raise ValueError('Byte offset calculation only valid for uncompressed GeoTIFFs.')
 
-            if page.chunks != (1, page.imagewidth):  # type: ignore [union-attr]
+            if page.chunks != (1, page.imagewidth):
                 raise ValueError('Byte offset calculation only valid for GeoTIFFs with one line per block.')
 
             offsets = page.dataoffsets
@@ -156,6 +158,8 @@ class Measurement:
         relative_path = self.path.relative_to(safe_path)
 
         content_unit = create_content_unit(simple_name, rep_id, unit_type)
+        assert self.size_bytes is not None
+        assert self.md5 is not None
         data_object = create_data_object(simple_name, relative_path, rep_id, mime_type, self.size_bytes, self.md5)
         return content_unit, data_object
 
