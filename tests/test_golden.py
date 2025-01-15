@@ -52,7 +52,7 @@ def test_burst2safe_ew():
 @pytest.mark.dependency(depends=['test_burst2safe_iw', 'test_burst2safe_ew'])
 def test_make_archive():
     work_path = Path.cwd() / CURRENT_BRANCH
-    shutil.make_archive(work_path, 'tar', work_path)
+    shutil.make_archive(str(work_path), 'tar', work_path)
 
 
 @pytest.mark.golden()

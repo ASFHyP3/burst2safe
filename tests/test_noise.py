@@ -33,6 +33,7 @@ class TestNoise:
         az_lut_element = ET.SubElement(az_vector, 'noiseAzimuthLut')
         az_lut_element.text = '0 2 4 6 8 10 12 14 16 18 20'
         for element in (line_element, az_lut_element):
+            assert element.text is not None
             element.set('count', str(len(element.text.split(' '))))
 
         new_az_vector = Noise._update_azimuth_vector(az_vector, 0, 10, 20)

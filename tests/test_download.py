@@ -19,7 +19,7 @@ def test_get_url_dict(tmp_path):
             metadata_url='http://metadata2.xml',
         ),
     ]
-    url_dict = download.get_url_dict(burst_infos)
+    url_dict = download.get_url_dict(burst_infos)  # type: ignore[arg-type]
     expected = {
         tmp_path / 'data1.tif': 'http://data1.tif',
         tmp_path / 'metadata1.xml': 'http://metadata1.xml',
@@ -30,5 +30,5 @@ def test_get_url_dict(tmp_path):
 
     del expected[tmp_path / 'data1.tif']
     (tmp_path / 'data1.tif').touch()
-    url_dict = download.get_url_dict(burst_infos)
+    url_dict = download.get_url_dict(burst_infos)  # type: ignore[arg-type]
     assert url_dict == expected

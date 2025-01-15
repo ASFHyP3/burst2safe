@@ -6,6 +6,14 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [PEP 440](https://www.python.org/dev/peps/pep-0440/)
 and uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.4.1]
+
+### Added
+* The [`static-analysis`](.github/workflows/static-analysis.yml) workflow now includes `mypy` for type checking.
+
+### Fixed
+* Add missing [`src/burst2safe/__init__.py`](./src/burst2safe/__init__.py) file.
+
 ## [1.4.0]
 
 ### Added

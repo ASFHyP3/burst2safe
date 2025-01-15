@@ -29,6 +29,7 @@ classifiers=[
     "Natural Language :: English",
     "Operating System :: OS Independent",
     "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.9",
     "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: 3.12",
@@ -95,3 +96,11 @@ convention = "google"
 [tool.ruff.lint.isort]
 case-sensitive = true
 lines-after-imports = 2
+
+[tool.mypy]
+python_version = "3.9"
+warn_redundant_casts = true
+warn_unused_ignores = true
+warn_unreachable = true
+strict_equality = true
+check_untyped_defs = true

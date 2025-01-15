@@ -2,7 +2,7 @@ import netrc
 import os
 from pathlib import Path
 from platform import system
-from typing import Tuple
+from typing import Tuple, Union
 
 
 EARTHDATA_HOST = 'urs.earthdata.nasa.gov'
@@ -20,7 +20,7 @@ def get_netrc() -> Path:
     return netrc_file
 
 
-def find_creds_in_env(username_name, password_name) -> Tuple[str, str]:
+def find_creds_in_env(username_name, password_name) -> Union[Tuple[str, str], Tuple[None, None]]:
     """Find credentials for a service in the environment.
 
     Args:
@@ -38,7 +38,7 @@ def find_creds_in_env(username_name, password_name) -> Tuple[str, str]:
     return None, None
 
 
-def find_creds_in_netrc(service) -> Tuple[str, str]:
+def find_creds_in_netrc(service) -> Union[Tuple[str, str], Tuple[None, None]]:
     """Find credentials for a service in the netrc file.
 
     Args:
@@ -53,6 +53,7 @@ def find_creds_in_netrc(service) -> Tuple[str, str]:
         if service in netrc_credentials.hosts:
             username = netrc_credentials.hosts[service][0]
             password = netrc_credentials.hosts[service][2]
+            assert password is not None
             return username, password
 
     return None, None
