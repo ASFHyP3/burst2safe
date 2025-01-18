@@ -49,11 +49,11 @@ class Manifest:
 
     def __init__(
         self,
-        content_units: List[ET.Element],
-        metadata_objects: List[ET.Element],
-        data_objects: List[ET.Element],
+        content_units: List[ET._Element],
+        metadata_objects: List[ET._Element],
+        data_objects: List[ET._Element],
         bbox: Polygon,
-        template_manifest: ET.Element,
+        template_manifest: ET._Element,
     ):
         """Initialize a Manifest object.
 
@@ -73,9 +73,9 @@ class Manifest:
 
         # Updated by methods
         self.information_package_map = None
-        self.metadata_section: Optional[ET.Element] = None
-        self.data_object_section: Optional[ET.Element] = None
-        self.xml: Optional[ET.Element] = None
+        self.metadata_section: Optional[ET._Element] = None
+        self.data_object_section: Optional[ET._Element] = None
+        self.xml: Optional[ET._Element] = None
         self.path: Optional[Path] = None
         self.crc: Optional[str] = None
 
@@ -174,7 +174,7 @@ class Kml:
             bbox: The bounding box of the product
         """
         self.bbox = bbox
-        self.xml: Optional[ET.Element] = None
+        self.xml: Optional[ET._Element] = None
 
     def assemble(self):
         """Assemble the components of the SAFE KML preview file."""
@@ -268,7 +268,7 @@ class Preview:
         ]
         if len(self.rfi) > 0:
             self.support.append('s1-level-1-rfi.xsd')
-        self.html: Optional[ET.Element] = None
+        self.html: Optional[ET._Element] = None
         self.path: Optional[Path] = None
 
     def create_base(self):

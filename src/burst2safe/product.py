@@ -40,8 +40,8 @@ class Product(Annotation):
         self.image_annotation = None
         self.doppler_centroid = None
         self.antenna_pattern = None
-        self.swath_timing: Optional[ET.Element] = None
-        self.geolocation_grid: Optional[ET.Element] = None
+        self.swath_timing: Optional[ET._Element] = None
+        self.geolocation_grid: Optional[ET._Element] = None
         self.coordinate_conversion = None
         self.swath_merging = None
         self.gcps: list = []

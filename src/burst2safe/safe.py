@@ -41,7 +41,7 @@ class Safe:
         self.safe_path = self.work_dir / self.name
         self.swaths: list = []
         self.blank_products: list = []
-        self.manifest: Optional[ET.Element] = None
+        self.manifest: Optional[ET._Element] = None
         self.kml: Optional[Kml] = None
 
         self.version = self.get_ipf_version(self.burst_infos[0].metadata_path)

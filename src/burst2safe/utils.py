@@ -231,7 +231,7 @@ def drop_duplicates(input_list: List) -> List:
     return list(dict.fromkeys(input_list))
 
 
-def set_text(element: ET.Element, text: Union[str, int]) -> None:
+def set_text(element: ET._Element, text: Union[str, int]) -> None:
     """Set the text of an element if it is not None.
 
     Args:
