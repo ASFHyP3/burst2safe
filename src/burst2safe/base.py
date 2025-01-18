@@ -305,8 +305,8 @@ class Annotation:
         Returns:
             The merged list element.
         """
-        list_elements = [input_xml.find(list_name) for input_xml in self.inputs]
-        list_of_list_elements = ListOfListElements(list_elements, self.start_line, self.slc_lengths)  # type: ignore[arg-type]
+        list_elements: list = [input_xml.find(list_name) for input_xml in self.inputs]
+        list_of_list_elements = ListOfListElements(list_elements, self.start_line, self.slc_lengths)
         merged_list = list_of_list_elements.create_filtered_list((self.min_anx, self.max_anx), line_bounds=line_bounds)
         return merged_list
 
