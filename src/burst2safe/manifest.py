@@ -1,7 +1,7 @@
 import hashlib
 from copy import deepcopy
 from pathlib import Path
-from typing import List, Optional
+from typing import List, Optional, Union
 
 import lxml.etree as ET
 import numpy as np
@@ -72,10 +72,10 @@ class Manifest:
         self.version = 'esa/safe/sentinel-1.0/sentinel-1/sar/level-1/slc/standard/iwdp'
 
         # Updated by methods
-        self.information_package_map = None
+        self.information_package_map: Optional[ET._Element] = None
         self.metadata_section: Optional[ET._Element] = None
         self.data_object_section: Optional[ET._Element] = None
-        self.xml: Optional[ET._Element] = None
+        self.xml: Union[ET._Element, ET._ElementTree, None] = None
         self.path: Optional[Path] = None
         self.crc: Optional[str] = None
 
@@ -119,12 +119,12 @@ class Manifest:
             's1Level1QuicklookSchema',
             's1MapOverlaySchema',
         ]
-        for obj in self.template.find('metadataSection'):
+        for obj in self.template.find('metadataSection'):  # type: ignore[union-attr]
             if obj.get('ID') in ids_to_keep:
                 metadata_section.append(deepcopy(obj))
 
         coordinates = metadata_section.find('.//{*}coordinates')
-        coordinates.text = get_footprint_string(self.bbox)
+        coordinates.text = get_footprint_string(self.bbox)  # type: ignore[union-attr]
 
         self.metadata_section = metadata_section
 
@@ -142,6 +142,9 @@ class Manifest:
 
         manifest = ET.Element('{%s}XFDU' % NAMESPACES['xfdu'], nsmap=NAMESPACES)
         manifest.set('version', self.version)
+        assert self.information_package_map is not None
+        assert self.metadata_section is not None
+        assert self.data_object_section is not None
         manifest.append(self.information_package_map)
         manifest.append(self.metadata_section)
         manifest.append(self.data_object_section)
@@ -157,7 +160,7 @@ class Manifest:
             out_path: The path to write the manifest to
             update_info: Whether to update the path and CRC
         """
-        assert self.xml is not None
+        assert isinstance(self.xml, ET._ElementTree)
         self.xml.write(out_path, pretty_print=True, xml_declaration=True, encoding='utf-8')
         if update_info:
             self.path = out_path
@@ -174,7 +177,7 @@ class Kml:
             bbox: The bounding box of the product
         """
         self.bbox = bbox
-        self.xml: Optional[ET._Element] = None
+        self.xml: Union[ET._Element, ET._ElementTree, None] = None
 
     def assemble(self):
         """Assemble the components of the SAFE KML preview file."""
@@ -209,7 +212,7 @@ class Kml:
             out_path: The path to write the manifest to
             update_info: Whether to update the path
         """
-        assert self.xml is not None
+        assert isinstance(self.xml, ET._ElementTree)
         self.xml.write(out_path, pretty_print=True, xml_declaration=True, encoding='utf-8')
         if update_info:
             self.path = out_path
@@ -268,7 +271,7 @@ class Preview:
         ]
         if len(self.rfi) > 0:
             self.support.append('s1-level-1-rfi.xsd')
-        self.html: Optional[ET._Element] = None
+        self.html: Optional[ET._ElementTree] = None
         self.path: Optional[Path] = None
 
     def create_base(self):

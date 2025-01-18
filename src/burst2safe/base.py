@@ -1,3 +1,4 @@
+# mypy: disable-error-code="union-attr"
 import hashlib
 from copy import deepcopy
 from datetime import datetime, timedelta
@@ -60,7 +61,7 @@ class ListOfListElements:
         Returns:
             The first time in the element.
         """
-        first_time = min([datetime.fromisoformat(sub.find(self.time_field).text) for sub in element])
+        first_time = min([datetime.fromisoformat(sub.find(self.time_field).text) for sub in element])  # type: ignore[arg-type]
         return first_time
 
     def get_unique_elements(self) -> List[ET._Element]:
@@ -71,21 +72,21 @@ class ListOfListElements:
         """
         list_of_element_lists = [item.findall('*') for item in self.inputs]
 
-        last_time = datetime.fromisoformat(list_of_element_lists[0][-1].find(self.time_field).text)
+        last_time = datetime.fromisoformat(list_of_element_lists[0][-1].find(self.time_field).text)  # type: ignore[arg-type]
         uniques = [deepcopy(element) for element in list_of_element_lists[0]]
         if self.has_line:
             assert self.slc_lengths is not None
             previous_line_count = self.slc_lengths[0]
 
         for i, element_list in enumerate(list_of_element_lists[1:]):
-            times = [datetime.fromisoformat(element.find(self.time_field).text) for element in element_list]
+            times = [datetime.fromisoformat(element.find(self.time_field).text) for element in element_list]  # type: ignore[arg-type]
             keep_index = [index for index, time in enumerate(times) if time > last_time]
             to_keep = [deepcopy(element_list[index]) for index in keep_index]
 
             if self.has_line:
-                new_lines = [int(elem.find('line').text) + previous_line_count for elem in to_keep]
+                new_lines = [int(elem.find('line').text) + previous_line_count for elem in to_keep]  # type: ignore[arg-type]
                 for elem, line in zip(to_keep, new_lines):
-                    set_text(elem.find('line'), line)
+                    set_text(elem.find('line'), line)  # type: ignore[arg-type]
                 assert self.slc_lengths is not None
                 previous_line_count += self.slc_lengths[i]
 
@@ -106,7 +107,7 @@ class ListOfListElements:
         """
         new_list = []
         for elem in element_list:
-            if line_bounds[0] <= int(elem.find('line').text) <= line_bounds[1]:
+            if line_bounds[0] <= int(elem.find('line').text) <= line_bounds[1]:  # type: ignore[arg-type,operator]
                 new_list.append(deepcopy(elem))
         return new_list
 
@@ -117,7 +118,7 @@ class ListOfListElements:
             elements: The list of elements to update.
         """
         for element in elements:
-            standard_line = int(element.find('line').text)
+            standard_line = int(element.find('line').text)  # type: ignore[arg-type]
             assert self.start_line is not None
             element.find('line').text = str(standard_line - self.start_line)
 
@@ -138,7 +139,7 @@ class ListOfListElements:
         max_anx_bound = anx_bounds[1] + buffer
         filtered_elements = []
         for element in elements:
-            azimuth_time = datetime.fromisoformat(element.find(self.time_field).text)
+            azimuth_time = datetime.fromisoformat(element.find(self.time_field).text)  # type: ignore[arg-type]
             if min_anx_bound < azimuth_time < max_anx_bound:
                 filtered_elements.append(deepcopy(element))
 
@@ -172,7 +173,8 @@ class ListOfListElements:
             filtered_elements = self.filter_by_line(filtered_elements, line_bounds)
 
         new_element = ET.Element(self.name)
-        [new_element.append(element) for element in filtered_elements]
+        for element in filtered_elements:
+            new_element.append(element)
         new_element.set('count', str(len(filtered_elements)))
         return new_element
 
@@ -273,14 +275,14 @@ class Annotation:
         products = [get_subxml_from_metadata(path, 'product', self.swath, self.pol) for path in self.metadata_paths]
         slc_lengths = []
         for annotation in products:
-            n_bursts = int(annotation.find('.//burstList').get('count'))
-            burst_length = int(annotation.find('.//linesPerBurst').text)
+            n_bursts = int(annotation.find('.//burstList').get('count'))  # type: ignore[arg-type]
+            burst_length = int(annotation.find('.//linesPerBurst').text)  # type: ignore[arg-type]
             slc_lengths.append(n_bursts * burst_length)
         self.slc_lengths = slc_lengths
 
         # annotation components to be extended by subclasses
-        self.ads_header = None
-        self.xml: Optional[ET._Element] = None
+        self.ads_header: Optional[ET._Element] = None
+        self.xml: Union[ET._Element, ET._ElementTree, None] = None
 
         # these attributes are updated when the annotation is written to a file
         self.size_bytes: Optional[int] = None
@@ -304,7 +306,7 @@ class Annotation:
             The merged list element.
         """
         list_elements = [input_xml.find(list_name) for input_xml in self.inputs]
-        list_of_list_elements = ListOfListElements(list_elements, self.start_line, self.slc_lengths)
+        list_of_list_elements = ListOfListElements(list_elements, self.start_line, self.slc_lengths)  # type: ignore[arg-type]
         merged_list = list_of_list_elements.create_filtered_list((self.min_anx, self.max_anx), line_bounds=line_bounds)
         return merged_list
 
@@ -331,6 +333,7 @@ class Annotation:
         Args:
             kwargs: Keyword arguments to pass to the lxml
         """
+        assert self.xml is not None
         xml_str = ET.tostring(self.xml, pretty_print=True, **kwargs)
         return xml_str.decode()
 

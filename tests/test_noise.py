@@ -1,3 +1,4 @@
+# mypy: disable-error-code="union-attr"
 import xml.etree.ElementTree as ET
 
 import numpy as np
@@ -36,7 +37,7 @@ class TestNoise:
             assert element.text is not None
             element.set('count', str(len(element.text.split(' '))))
 
-        new_az_vector = Noise._update_azimuth_vector(az_vector, 0, 10, 20)
+        new_az_vector = Noise._update_azimuth_vector(az_vector, 0, 10, 20)  # type: ignore[arg-type]
         assert new_az_vector.find('firstAzimuthLine').text == '0'
         assert new_az_vector.find('lastAzimuthLine').text == '10'
         assert new_az_vector.find('line').get('count') == '6'
