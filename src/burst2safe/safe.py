@@ -6,7 +6,6 @@ from itertools import product
 from pathlib import Path
 from typing import List, Optional, Tuple, Union, cast
 
-import lxml.etree as ET
 import numpy as np
 from shapely.geometry import MultiPolygon, Polygon
 

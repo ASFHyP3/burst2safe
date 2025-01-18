@@ -154,7 +154,9 @@ class Product(Annotation):
         for element in slice_list:
             dimensions_list.remove(element)
 
-        list_elements: list = [prod.find('imageAnnotation/processingInformation/inputDimensionsList') for prod in self.inputs]
+        list_elements: list = [
+            prod.find('imageAnnotation/processingInformation/inputDimensionsList') for prod in self.inputs
+        ]
         lol = ListOfListElements(list_elements, self.start_line, self.slc_lengths)
         filtered = lol.create_filtered_list((self.min_anx, self.max_anx))
         [dimensions_list.append(element) for element in filtered]
