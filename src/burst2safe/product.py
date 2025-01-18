@@ -146,7 +146,8 @@ class Product(Annotation):
         image_information.find('imageStatistics/outputDataStdDev/re').text = ''
         image_information.find('imageStatistics/outputDataStdDev/im').text = ''
 
-        image_annotation.append(image_information)  # type: ignore[arg-type]
+        assert image_information is not None
+        image_annotation.append(image_information)
 
         processing_information = deepcopy(self.inputs[0].find('imageAnnotation/processingInformation'))
         dimensions_list = processing_information.find('inputDimensionsList')
