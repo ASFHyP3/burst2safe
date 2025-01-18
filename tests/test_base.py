@@ -1,3 +1,4 @@
+# mypy: disable-error-code="union-attr"
 from datetime import datetime, timedelta
 from pathlib import Path
 

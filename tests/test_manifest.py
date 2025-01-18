@@ -13,6 +13,7 @@ def manifest(test_data1_xml):
     data_objects = [ET.Element('data_object')]
     bbox = Polygon([(1, 1), (1, 2), (2, 2), (2, 1), (1, 1)])
     template_manifest = get_subxml_from_metadata(test_data1_xml, 'manifest')
+    assert template_manifest is not None
     test_manifest = Manifest(content_units, metadata_objects, data_objects, bbox, template_manifest)
     return test_manifest
 

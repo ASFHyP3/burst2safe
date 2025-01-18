@@ -6,6 +6,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [PEP 440](https://www.python.org/dev/peps/pep-0440/)
 and uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.4.2]
+
+### Changed
+* Upgraded the `reusable-mypy` action to [v0.15.0](https://github.com/ASFHyP3/actions/releases/tag/v0.15.0) and replaced the `--ignore-missing-imports` option with `disable_error_code = ["import-untyped"]` as recommended by <https://github.com/ASFHyP3/actions/issues/225>, then ignored or fixed the resulting `mypy` errors.
+
 ## [1.4.1]
 
 ### Added

@@ -113,8 +113,8 @@ def test_calculate_crc16(tmp_path, test_data_dir):
 def test_get_subxml_from_metadata(xml_type, swath, test_data1_xml):
     result = utils.get_subxml_from_metadata(test_data1_xml, xml_type, swath, 'VV')
     assert isinstance(result, lxml.etree._Element)
-    assert result.find('adsHeader/swath').text == swath
-    assert result.find('adsHeader/polarisation').text == 'VV'
+    assert result.find('adsHeader/swath').text == swath  # type: ignore[union-attr]
+    assert result.find('adsHeader/polarisation').text == 'VV'  # type: ignore[union-attr]
     assert result.tag == 'content'
 
 

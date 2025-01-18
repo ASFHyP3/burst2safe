@@ -1,4 +1,6 @@
+# mypy: disable-error-code="union-attr"
 from copy import deepcopy
+from typing import Optional
 
 import lxml.etree as ET
 import numpy as np
@@ -19,9 +21,9 @@ class Noise(Annotation):
             image_number: Image number.
         """
         super().__init__(burst_infos, 'noise', ipf_version, image_number)
-        self.noise_vector_list = None  # Only used in version < 2.90
-        self.range_vector_list = None
-        self.azimuth_vector_list = None
+        self.noise_vector_list: Optional[ET._Element] = None  # Only used in version < 2.90
+        self.range_vector_list: Optional[ET._Element] = None
+        self.azimuth_vector_list: Optional[ET._Element] = None
 
     def create_range_vector_list(self):
         """Create the range vector list."""
@@ -56,7 +58,9 @@ class Noise(Annotation):
         return first_index, last_index
 
     @staticmethod
-    def _update_azimuth_vector(az_vector: ET.Element, line_offset: int, start_line: int, stop_line: int) -> ET.Element:
+    def _update_azimuth_vector(
+        az_vector: ET._Element, line_offset: int, start_line: int, stop_line: int
+    ) -> ET._Element:
         """Update the azimuth vector to match the new line range. Subset noiseAzimuthLut to match.
 
         Args:
@@ -93,7 +97,7 @@ class Noise(Annotation):
         """Create the azimuth vector list. ListOfListElements class can't be used here because the
         noiseAzimuthVectorList has a different structure than the other lists elements.
         """
-        az_vectors = [noise.find('noiseAzimuthVectorList') for noise in self.inputs]
+        az_vectors: list = [noise.find('noiseAzimuthVectorList') for noise in self.inputs]
         updated_az_vectors = []
         for i, az_vector_set in enumerate(az_vectors):
             slc_offset = sum(self.slc_lengths[:i])
@@ -101,15 +105,16 @@ class Noise(Annotation):
             updated_az_vector_set = []
             for az_vector in az_vectors:
                 line_offset = slc_offset - self.start_line
+                assert az_vector is not None
                 updated_az_vector = self._update_azimuth_vector(az_vector, line_offset, self.start_line, self.stop_line)
                 updated_az_vector_set.append(updated_az_vector)
             updated_az_vectors.append(updated_az_vector_set)
 
-        updated_az_vectors = flatten(updated_az_vectors)
+        updated_az_vectors_flattened = flatten(updated_az_vectors)
 
         new_az_vector_list = ET.Element('noiseAzimuthVectorList')
-        new_az_vector_list.set('count', str(len(updated_az_vectors)))
-        for az_vector in updated_az_vectors:
+        new_az_vector_list.set('count', str(len(updated_az_vectors_flattened)))
+        for az_vector in updated_az_vectors_flattened:
             new_az_vector_list.append(az_vector)
         self.azimuth_vector_list = new_az_vector_list
 
@@ -118,15 +123,19 @@ class Noise(Annotation):
         self.create_ads_header()
 
         noise = ET.Element('noise')
+        assert self.ads_header is not None
         noise.append(self.ads_header)
 
         if self.major_version >= 3 or self.minor_version >= 90:
             self.create_range_vector_list()
             self.create_azimuth_vector_list()
+            assert self.range_vector_list is not None
+            assert self.azimuth_vector_list is not None
             noise.append(self.range_vector_list)
             noise.append(self.azimuth_vector_list)
         else:
             self.create_noise_vector_list()
+            assert self.noise_vector_list is not None
             noise.append(self.noise_vector_list)
 
         noise_tree = ET.ElementTree(noise)

@@ -6,7 +6,6 @@ from itertools import product
 from pathlib import Path
 from typing import List, Optional, Tuple, Union, cast
 
-import lxml.etree as ET
 import numpy as np
 from shapely.geometry import MultiPolygon, Polygon
 
@@ -41,7 +40,7 @@ class Safe:
         self.safe_path = self.work_dir / self.name
         self.swaths: list = []
         self.blank_products: list = []
-        self.manifest: Optional[ET.Element] = None
+        self.manifest: Optional[Manifest] = None
         self.kml: Optional[Kml] = None
 
         self.version = self.get_ipf_version(self.burst_infos[0].metadata_path)
@@ -62,8 +61,8 @@ class Safe:
         desired_tag = './/{http://www.esa.int/safe/sentinel-1.0}processing'
         creation_times = []
         for manifest in manifests:
-            slc_processing = [elem for elem in manifest.findall(desired_tag) if elem.get('name') == 'SLC Processing'][0]
-            creation_times.append(datetime.strptime(slc_processing.get('stop'), '%Y-%m-%dT%H:%M:%S.%f'))
+            slc_processing = [elem for elem in manifest.findall(desired_tag) if elem.get('name') == 'SLC Processing'][0]  # type: ignore[union-attr]
+            creation_times.append(datetime.strptime(slc_processing.get('stop'), '%Y-%m-%dT%H:%M:%S.%f'))  # type: ignore[arg-type]
         creation_time = max(creation_times)
         return creation_time
 
@@ -192,8 +191,10 @@ class Safe:
             The IPF version as a string
         """
         manifest = get_subxml_from_metadata(metadata_path, 'manifest')
-        version_xml = [elem for elem in manifest.findall('.//{*}software') if elem.get('name') == 'Sentinel-1 IPF'][0]
-        return version_xml.get('version')
+        version_xml = [elem for elem in manifest.findall('.//{*}software') if elem.get('name') == 'Sentinel-1 IPF'][0]  # type: ignore[union-attr]
+        version_str = version_xml.get('version')
+        assert version_str is not None
+        return version_str
 
     def get_bbox(self) -> Polygon:
         """Get the bounding box for the SAFE file.
@@ -393,6 +394,7 @@ class Safe:
         manifest_name = self.safe_path / 'manifest.safe'
         content_units, metadata_objects, data_objects = self.compile_manifest_components()
         template_manifest = get_subxml_from_metadata(self.burst_infos[0].metadata_path, 'manifest')
+        assert template_manifest is not None
         manifest = Manifest(content_units, metadata_objects, data_objects, self.get_bbox(), template_manifest)
         manifest.assemble()
         manifest.write(manifest_name)
@@ -417,6 +419,7 @@ class Safe:
     def update_product_identifier(self) -> None:
         """Update the product identifier using the CRC of the manifest file."""
         assert self.manifest is not None
+        assert self.manifest.crc is not None
         new_new = self.get_name(unique_id=self.manifest.crc)
         new_path = self.work_dir / new_new
         if new_path.exists():
