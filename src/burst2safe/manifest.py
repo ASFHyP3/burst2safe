@@ -124,7 +124,8 @@ class Manifest:
                 metadata_section.append(deepcopy(obj))
 
         coordinates = metadata_section.find('.//{*}coordinates')
-        coordinates.text = get_footprint_string(self.bbox)  # type: ignore[union-attr]
+        assert coordinates is not None
+        coordinates.text = get_footprint_string(self.bbox)
 
         self.metadata_section = metadata_section
 
