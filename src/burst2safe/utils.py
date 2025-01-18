@@ -183,7 +183,7 @@ def calculate_crc16(file_path: Path) -> str:
 
 def get_subxml_from_metadata(
     metadata_path: Path, xml_type: str, subswath: Optional[str] = None, polarization: Optional[str] = None
-) -> ET.Element:
+) -> Optional[ET._Element]:
     """Extract child xml info from ASF combined metadata file.
 
     Args:
