@@ -159,7 +159,8 @@ class Product(Annotation):
         filtered = lol.create_filtered_list((self.min_anx, self.max_anx))
         [dimensions_list.append(element) for element in filtered]
 
-        image_annotation.append(processing_information)  # type: ignore[arg-type]
+        assert processing_information is not None
+        image_annotation.append(processing_information)
         self.image_annotation = image_annotation
 
     def update_data_stats(self, data_mean: complex, data_std: complex):
