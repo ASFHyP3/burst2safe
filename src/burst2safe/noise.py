@@ -56,7 +56,9 @@ class Noise(Annotation):
         return first_index, last_index
 
     @staticmethod
-    def _update_azimuth_vector(az_vector: ET._Element, line_offset: int, start_line: int, stop_line: int) -> ET._Element:
+    def _update_azimuth_vector(
+        az_vector: ET._Element, line_offset: int, start_line: int, stop_line: int
+    ) -> ET._Element:
         """Update the azimuth vector to match the new line range. Subset noiseAzimuthLut to match.
 
         Args:
