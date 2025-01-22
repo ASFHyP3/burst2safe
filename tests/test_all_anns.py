@@ -15,10 +15,12 @@ def test_all_anns(tmp_path):
         xml = ET.parse(prod).getroot()
 
         burst_list = xml.find('.//burstList')
+        assert burst_list is not None
         assert burst_list.attrib['count'] == '0'
         assert len(burst_list) == 0
 
         geolocation_grid = xml.find('.//geolocationGridPointList')
+        assert geolocation_grid is not None
         assert geolocation_grid.attrib['count'] == '0'
         assert len(geolocation_grid) == 0
 
@@ -26,9 +28,11 @@ def test_all_anns(tmp_path):
     xml_real = ET.parse(prod_real).getroot()
 
     burst_list = xml_real.find('.//burstList')
+    assert burst_list is not None
     assert int(burst_list.attrib['count']) > 0
     assert len(burst_list) > 0
 
     geolocation_grid = xml_real.find('.//geolocationGridPointList')
+    assert geolocation_grid is not None
     assert int(geolocation_grid.attrib['count']) > 0
     assert len(geolocation_grid) > 0

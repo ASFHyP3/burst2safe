@@ -1,3 +1,4 @@
+# mypy: disable-error-code="union-attr"
 """Generate a SAFE file from local burst extractor outputs"""
 
 import argparse
@@ -29,13 +30,15 @@ def burst_info_from_local(
     manifest = utils.get_subxml_from_metadata(xml_path, 'manifest', swath, polarization)
     xml_orbit_path = './/{*}metadataObject[@ID="measurementOrbitReference"]/metadataWrap/xmlData/{*}orbitReference'
     meta_orbit = manifest.find(xml_orbit_path)
-    abs_orbit_start, abs_orbit_stop = [int(x.text) for x in meta_orbit.findall('{*}orbitNumber')]
-    rel_orbit_start, rel_orbit_stop = [int(x.text) for x in meta_orbit.findall('{*}relativeOrbitNumber')]
+    abs_orbit_start, abs_orbit_stop = [int(x.text) for x in meta_orbit.findall('{*}orbitNumber')]  # type: ignore[arg-type]
+    rel_orbit_start, rel_orbit_stop = [int(x.text) for x in meta_orbit.findall('{*}relativeOrbitNumber')]  # type: ignore[arg-type]
     direction = meta_orbit.find('{*}extension/{*}orbitProperties/{*}pass').text.upper()
 
     product = utils.get_subxml_from_metadata(xml_path, 'product', swath, polarization)
     sensing_time_str = product.findall('swathTiming/burstList/burst')[burst_index].find('sensingTime').text
     anx_time_str = meta_orbit.find('{*}extension/{*}orbitProperties/{*}ascendingNodeTime').text
+    assert sensing_time_str is not None
+    assert anx_time_str is not None
     burst_id, rel_orbit = calculate_burstid(sensing_time_str, anx_time_str, rel_orbit_start, rel_orbit_stop, swath)
     info = utils.BurstInfo(
         granule='',

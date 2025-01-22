@@ -1,3 +1,4 @@
+# mypy: disable-error-code="union-attr"
 import json
 import warnings
 from argparse import Namespace
@@ -44,18 +45,18 @@ class BurstInfo:
     def add_shape_info(self):
         """Add shape information to the BurstInfo object."""
         annotation = get_subxml_from_metadata(self.metadata_path, 'product', self.swath, self.polarization)
-        self.length = int(annotation.find('swathTiming/linesPerBurst').text)
-        self.width = int(annotation.find('swathTiming/samplesPerBurst').text)
+        self.length = int(annotation.find('swathTiming/linesPerBurst').text)  # type: ignore[arg-type]
+        self.width = int(annotation.find('swathTiming/samplesPerBurst').text)  # type: ignore[arg-type]
 
     def add_start_stop_utc(self):
         """Add start and stop UTC to burst info.
         There is spatial overlap between bursts, so burst start/stop times will overlap as well.
         """
         annotation = get_subxml_from_metadata(self.metadata_path, 'product', self.swath, self.polarization)
-        start_utcs = [datetime.fromisoformat(x.find('azimuthTime').text) for x in annotation.findall('.//burst')]
+        start_utcs = [datetime.fromisoformat(x.find('azimuthTime').text) for x in annotation.findall('.//burst')]  # type: ignore[arg-type]
         self.start_utc = start_utcs[self.burst_index]
 
-        azimuth_time_interval = float(annotation.find('.//azimuthTimeInterval').text)
+        azimuth_time_interval = float(annotation.find('.//azimuthTimeInterval').text)  # type: ignore[arg-type]
         assert self.length is not None
         burst_time_interval = timedelta(seconds=(self.length - 1) * azimuth_time_interval)
         self.stop_utc = self.start_utc + burst_time_interval
@@ -183,7 +184,7 @@ def calculate_crc16(file_path: Path) -> str:
 
 def get_subxml_from_metadata(
     metadata_path: Path, xml_type: str, subswath: Optional[str] = None, polarization: Optional[str] = None
-) -> ET.Element:
+) -> Optional[ET._Element]:
     """Extract child xml info from ASF combined metadata file.
 
     Args:
@@ -231,7 +232,7 @@ def drop_duplicates(input_list: List) -> List:
     return list(dict.fromkeys(input_list))
 
 
-def set_text(element: ET.Element, text: Union[str, int]) -> None:
+def set_text(element: ET._Element, text: Union[str, int]) -> None:
     """Set the text of an element if it is not None.
 
     Args:

@@ -1,3 +1,4 @@
+# mypy: disable-error-code="union-attr"
 from collections.abc import Iterable
 from copy import deepcopy
 from dataclasses import dataclass
@@ -36,20 +37,20 @@ class Product(Annotation):
         super().__init__(burst_infos, 'product', ipf_version, image_number)
         self.dummy = dummy
         self.qulatity_information = None
-        self.general_annotation = None
-        self.image_annotation = None
-        self.doppler_centroid = None
-        self.antenna_pattern = None
-        self.swath_timing: Optional[ET.Element] = None
-        self.geolocation_grid: Optional[ET.Element] = None
-        self.coordinate_conversion = None
-        self.swath_merging = None
+        self.general_annotation: Optional[ET._Element] = None
+        self.image_annotation: Optional[ET._Element] = None
+        self.doppler_centroid: Optional[ET._Element] = None
+        self.antenna_pattern: Optional[ET._Element] = None
+        self.swath_timing: Optional[ET._Element] = None
+        self.geolocation_grid: Optional[ET._Element] = None
+        self.coordinate_conversion: Optional[ET._Element] = None
+        self.swath_merging: Optional[ET._Element] = None
         self.gcps: list = []
 
     def create_quality_information(self):
         """Create the qualityInformation element."""
         quality_information = ET.Element('qualityInformation')
-        quality_information.append(deepcopy(self.inputs[0].find('qualityInformation/productQualityIndex')))
+        quality_information.append(deepcopy(self.inputs[0].find('qualityInformation/productQualityIndex')))  # type: ignore[arg-type]
 
         quality_datas = flatten([cal.findall('qualityInformation/qualityDataList/qualityData') for cal in self.inputs])
         quality_data_list = ET.Element('qualityDataList')
@@ -75,9 +76,10 @@ class Product(Annotation):
 
         # TODO: productInformation/platformHeading should be calculated more accurately
         platform_heading_path = 'generalAnnotation/productInformation/platformHeading'
-        platform_heading = np.mean([float(prod.find(platform_heading_path).text) for prod in self.inputs])
+        platform_heading = np.mean([float(prod.find(platform_heading_path).text) for prod in self.inputs])  # type: ignore[arg-type]
         product_information.find('platformHeading').text = f'{platform_heading:.14e}'
 
+        assert product_information is not None
         general_annotation.append(product_information)
 
         lists = [
@@ -91,7 +93,7 @@ class Product(Annotation):
             'azimuthFmRateList',
         ]
         for list_name in lists:
-            list_elements = [prod.find(f'generalAnnotation/{list_name}') for prod in self.inputs]
+            list_elements: list = [prod.find(f'generalAnnotation/{list_name}') for prod in self.inputs]
             if len(flatten([element.findall('*') for element in list_elements])) == 0:
                 filtered = ET.Element(list_elements[0].tag)
                 filtered.set('count', '0')
@@ -100,7 +102,8 @@ class Product(Annotation):
                 unique = lol.get_unique_elements()
                 filtered = ET.Element('replicaInformationList')
                 filtered.set('count', str(len(unique)))
-                [filtered.append(element) for element in unique]
+                for element in unique:
+                    filtered.append(element)
             else:
                 lol = ListOfListElements(list_elements, self.start_line, self.slc_lengths)
                 filtered = lol.create_filtered_list((self.min_anx, self.max_anx), buffer=timedelta(seconds=500))
@@ -135,7 +138,7 @@ class Product(Annotation):
         image_information.find('numberOfLines').text = str(self.total_lines)
 
         az_spacing_path = 'imageAnnotation/imageInformation/azimuthPixelSpacing'
-        az_spacing = np.mean([float(prod.find(az_spacing_path).text) for prod in self.inputs])
+        az_spacing = np.mean([float(prod.find(az_spacing_path).text) for prod in self.inputs])  # type: ignore[arg-type]
         image_information.find('azimuthPixelSpacing').text = f'{az_spacing:.6e}'
 
         image_information.find('imageStatistics/outputDataMean/re').text = ''
@@ -143,6 +146,7 @@ class Product(Annotation):
         image_information.find('imageStatistics/outputDataStdDev/re').text = ''
         image_information.find('imageStatistics/outputDataStdDev/im').text = ''
 
+        assert image_information is not None
         image_annotation.append(image_information)
 
         processing_information = deepcopy(self.inputs[0].find('imageAnnotation/processingInformation'))
@@ -150,11 +154,14 @@ class Product(Annotation):
         for element in slice_list:
             dimensions_list.remove(element)
 
-        list_elements = [prod.find('imageAnnotation/processingInformation/inputDimensionsList') for prod in self.inputs]
+        list_elements: list = [
+            prod.find('imageAnnotation/processingInformation/inputDimensionsList') for prod in self.inputs
+        ]
         lol = ListOfListElements(list_elements, self.start_line, self.slc_lengths)
         filtered = lol.create_filtered_list((self.min_anx, self.max_anx))
         [dimensions_list.append(element) for element in filtered]
 
+        assert processing_information is not None
         image_annotation.append(processing_information)
         self.image_annotation = image_annotation
 
@@ -192,14 +199,14 @@ class Product(Annotation):
 
     def create_swath_timing(self):
         """Create the swathTiming element."""
-        burst_lists = [prod.find('swathTiming/burstList') for prod in self.inputs]
+        burst_lists: list = [prod.find('swathTiming/burstList') for prod in self.inputs]
         burst_lol = ListOfListElements(burst_lists, self.start_line, self.slc_lengths)
         filtered = burst_lol.create_filtered_list((self.min_anx, self.max_anx), buffer=timedelta(seconds=0.1))
 
         # TODO: This is needed since we always buffer backward AND forward
-        if int(filtered.get('count')) > len(self.burst_infos):
+        if int(filtered.get('count')) > len(self.burst_infos):  # type: ignore[arg-type]
             filtered.remove(filtered[-1])
-            filtered.set('count', str(int(filtered.get('count')) - 1))
+            filtered.set('count', str(int(filtered.get('count')) - 1))  # type: ignore[arg-type]
 
         for burst in filtered:
             burst.find('byteOffset').text = ''
@@ -218,11 +225,11 @@ class Product(Annotation):
         gcp_xmls = self.geolocation_grid.find('geolocationGridPointList').findall('*')
         for gcp_xml in gcp_xmls:
             gcp = GeoPoint(
-                float(gcp_xml.find('longitude').text),
-                float(gcp_xml.find('latitude').text),
-                float(gcp_xml.find('height').text),
-                int(gcp_xml.find('line').text),
-                int(gcp_xml.find('pixel').text),
+                float(gcp_xml.find('longitude').text),  # type: ignore[arg-type]
+                float(gcp_xml.find('latitude').text),  # type: ignore[arg-type]
+                float(gcp_xml.find('height').text),  # type: ignore[arg-type]
+                int(gcp_xml.find('line').text),  # type: ignore[arg-type]
+                int(gcp_xml.find('pixel').text),  # type: ignore[arg-type]
             )
             self.gcps.append(gcp)
 
@@ -238,6 +245,7 @@ class Product(Annotation):
 
         for swath_timing in [self.swath_timing, self.xml.find('swathTiming')]:
             burst_list = swath_timing.find('burstList')
+            assert burst_list is not None
             for i, byte_offset in enumerate(byte_offsets):
                 burst_list[i].find('byteOffset').text = str(byte_offset)
 
@@ -294,6 +302,18 @@ class Product(Annotation):
             self.remove_burst_data()
 
         product = ET.Element('product')
+
+        assert self.ads_header is not None
+        assert self.quality_information is not None
+        assert self.general_annotation is not None
+        assert self.image_annotation is not None
+        assert self.doppler_centroid is not None
+        assert self.antenna_pattern is not None
+        assert self.swath_timing is not None
+        assert self.geolocation_grid is not None
+        assert self.coordinate_conversion is not None
+        assert self.swath_merging is not None
+
         product.append(self.ads_header)
         product.append(self.quality_information)
         product.append(self.general_annotation)

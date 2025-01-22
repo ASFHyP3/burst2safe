@@ -1,3 +1,4 @@
+# mypy: disable-error-code="union-attr"
 import lxml.etree as ET
 
 from burst2safe.product import GeoPoint, Product
