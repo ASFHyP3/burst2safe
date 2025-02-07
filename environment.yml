@@ -18,4 +18,4 @@ dependencies:
   - pytest-cov
   - pytest-dependency
   - pip:
-    - -r requirements-dev.txt
+    - -r requirements-static.txt
