@@ -1,42 +1,53 @@
+"""Identify differences in Sentinel-1 IPF versions by downloading representative SLCs and extracting support files.
+
+IPF list: https://sar-mpc.eu/processor/ipf/
+"""
+
 import os
 import shutil
-from datetime import datetime
+from dataclasses import dataclass
 from pathlib import Path
-from typing import cast
 from zipfile import ZipFile
 
 import asf_search as asf
 import lxml.etree as ET
-import numpy as np
 
 from burst2safe.utils import get_burst_infos
 
 
+@dataclass
+class Version:
+    id: str
+    important: bool
+
+
 VERSIONS = [
-    ('2.36', datetime(2014, 10, 1), True),
-    ('2.43', datetime(2015, 3, 19), False),
-    ('2.45', datetime(2015, 6, 17), True),
-    ('2.52', datetime(2015, 7, 2), False),
-    ('2.53', datetime(2015, 7, 18), False),  # may not need
-    ('2.60', datetime(2015, 11, 20), True),
-    ('2.62', datetime(2016, 3, 14), False),
-    ('2.70', datetime(2016, 4, 13), False),
-    ('2.71', datetime(2016, 5, 11), False),
-    ('2.72', datetime(2016, 8, 23), False),
-    ('2.82', datetime(2017, 3, 28), False),
-    ('2.84', datetime(2017, 8, 22), False),  # may not need
-    ('2.90', datetime(2018, 3, 13), True),
-    ('2.91', datetime(2018, 6, 26), False),
-    ('3.10', datetime(2019, 6, 26), False),
-    ('3.20', datetime(2020, 1, 29), False),
-    ('3.30', datetime(2020, 6, 23), False),  # may not need
-    ('3.31', datetime(2020, 6, 30), False),
-    ('3.40', datetime(2021, 11, 4), True),
-    ('3.51', datetime(2022, 3, 23), False),
-    ('3.52', datetime(2022, 5, 12), False),  # may not need
-    ('3.61', datetime(2023, 3, 30), False),
-    ('3.71', datetime(2023, 10, 19), True),
-    ('Current', datetime.now(), False),
+    Version('2.36', True),
+    Version('2.43', False),
+    Version('2.45', True),
+    Version('2.52', False),
+    Version('2.53', False),  # may not need
+    Version('2.60', True),
+    Version('2.62', False),
+    Version('2.70', False),
+    Version('2.71', False),
+    Version('2.72', False),
+    Version('2.82', False),
+    Version('2.84', False),  # may not need
+    Version('2.90', True),
+    Version('2.91', False),
+    Version('3.10', False),
+    Version('3.20', False),
+    Version('3.30', False),  # may not need
+    Version('3.31', False),
+    Version('3.40', True),
+    Version('3.51', False),
+    Version('3.52', False),  # may not need
+    Version('3.61', False),
+    Version('3.71', True),
+    Version('3.80', True),
+    Version('3.90', True),
+    Version('3.91', True),
 ]
 
 
@@ -50,20 +61,17 @@ def find_representative_bursts(important_only=False):
         'maxResults': 2000,
     }
     results = asf.search(**options)
-    bursts = sorted(get_burst_infos(results, Path.cwd()), key=lambda x: cast(datetime, x.date))
-    mid_bursts = []
-    for i in range(len(VERSIONS) - 1):
-        date1 = VERSIONS[i][1]
-        date2 = VERSIONS[i + 1][1]
-        bursts_between = [burst for burst in bursts if date1 <= cast(datetime, burst.date) < date2]
-        mid_index = int(np.floor(len(bursts_between) / 2))
-        mid_burst = bursts_between[mid_index]
-        if important_only:
-            if VERSIONS[i][2]:
-                mid_bursts.append(mid_burst)
-        else:
-            mid_bursts.append(mid_burst)
-    return mid_bursts
+    burst_infos = []
+    for version in VERSIONS:
+        if important_only and not version.important:
+            continue
+        matching_version = [x for x in results if x.umm['PGEVersionClass']['PGEVersion'] == f'00{version.id}']
+        if len(matching_version) == 0:
+            print(f'No bursts with version {version.id} found')
+            continue
+        burst_infos.append(get_burst_infos(matching_version[:1], Path.cwd())[0])
+
+    return burst_infos
 
 
 def download_slcs():
@@ -124,17 +132,17 @@ def download_changing_metadata():
     sorted_bursts = sorted(bursts, key=lambda x: x.date)
 
     important_versions = []
-    for (version, _, important), burst in zip(VERSIONS, sorted_bursts):
-        if important:
-            print(version, burst.granule)
+    for version, burst in zip(VERSIONS, sorted_bursts):
+        if version.important:
+            print(version.id, burst.granule)
             important_versions.append(burst)
 
     for burst in important_versions:
         asf.download_url(burst.metadata_url, path='.', filename=burst.metadata_path.name)
 
 
-def download_representative_support():
-    slcs = [f'{burst.slc_granule}-SLC' for burst in find_representative_bursts(important_only=True)]
+def download_representative_support(important_only=True):
+    slcs = [f'{burst.slc_granule}-SLC' for burst in find_representative_bursts(important_only=important_only)]
     slc_results = asf.granule_search(slcs)
     slc_results.download('.')
     slc_paths = sorted(list(Path().glob('*.zip')))
@@ -145,4 +153,4 @@ def download_representative_support():
 if __name__ == '__main__':
     # identify_changing_versions()
     # download_changing_metadata()
-    download_representative_support()
+    download_representative_support(important_only=False)
