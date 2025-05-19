@@ -3,6 +3,7 @@
 IPF list: https://sar-mpc.eu/processor/ipf/
 """
 
+import argparse
 import os
 import shutil
 from dataclasses import dataclass
@@ -23,31 +24,31 @@ class Version:
 
 VERSIONS = [
     Version('2.36', True),
-    Version('2.43', False),
-    Version('2.45', True),
+    Version('2.43', True),
+    Version('2.45', False),
     Version('2.52', False),
-    Version('2.53', False),  # may not need
+    Version('2.53', False),
     Version('2.60', True),
     Version('2.62', False),
     Version('2.70', False),
     Version('2.71', False),
     Version('2.72', False),
     Version('2.82', False),
-    Version('2.84', False),  # may not need
+    Version('2.84', False),
     Version('2.90', True),
     Version('2.91', False),
     Version('3.10', False),
     Version('3.20', False),
-    Version('3.30', False),  # may not need
+    Version('3.30', False),
     Version('3.31', False),
     Version('3.40', True),
     Version('3.51', False),
-    Version('3.52', False),  # may not need
+    Version('3.52', False),
     Version('3.61', False),
     Version('3.71', True),
     Version('3.80', True),
-    Version('3.90', True),
-    Version('3.91', True),
+    Version('3.90', False),
+    Version('3.91', False),
 ]
 
 
@@ -61,7 +62,7 @@ def find_representative_bursts(important_only=False):
         'maxResults': 2000,
     }
     results = asf.search(**options)
-    burst_infos = []
+    burst_infos, versions = [], []
     for version in VERSIONS:
         if important_only and not version.important:
             continue
@@ -70,14 +71,15 @@ def find_representative_bursts(important_only=False):
             print(f'No bursts with version {version.id} found')
             continue
         burst_infos.append(get_burst_infos(matching_version[:1], Path.cwd())[0])
+        versions.append(version.id)
+    return burst_infos, versions
 
-    return burst_infos
 
-
-def download_slcs():
-    slcs = [f'{burst.slc_granule}-SLC' for burst in find_representative_bursts()]
+def download_slcs(slcs, workdir):
     slc_results = asf.granule_search(slcs)
-    slc_results.download('.')
+    slc_results.download(workdir)
+    slc_paths = sorted(list(workdir.glob('*.zip')))
+    return slc_paths
 
 
 def get_version(slc_path):
@@ -95,9 +97,9 @@ def get_versions(slc_paths):
     versions.sort(key=lambda x: x[1])
 
 
-def extract_support_folder(slc_path):
+def extract_support_folder(slc_path, workdir):
     version = get_version(slc_path).replace('.', '')
-    out_dir = Path(f'support_{version}')
+    out_dir = workdir / f'support_{version}'
     out_dir.mkdir(exist_ok=True)
     slc_name = f'{slc_path.name.split(".")[0]}.SAFE'
     with ZipFile(slc_path) as zip_ref:
@@ -119,38 +121,53 @@ def create_diffs():
         os.system(f'git diff --no-index {support1} {support2} > {diff_file}')
 
 
-def identify_changing_versions():
-    download_slcs()
-    slc_paths = sorted(list(Path().glob('*.zip')))
+def get_changes(workdir):
+    files = sorted(list(workdir.glob('diff_support*txt')))
+    has_changes = []
+    for file in files:
+        if os.path.getsize(file) > 0:
+            has_changes.append(file.name)
+    return has_changes
+
+
+def identify_changing_versions(workdir):
+    slcs = [f'{burst.slc_granule}-SLC' for burst, _ in find_representative_bursts(important_only=False)]
+    slc_paths = download_slcs(slcs, workdir)
     for slc_path in slc_paths:
-        extract_support_folder(slc_path)
+        extract_support_folder(slc_path, workdir)
     create_diffs()
+    has_changes = get_changes(workdir)
+    print('Files with changes:')
+    [print(file) for file in has_changes]
 
 
-def download_changing_metadata():
-    bursts = find_representative_bursts()
-    sorted_bursts = sorted(bursts, key=lambda x: x.date)
-
-    important_versions = []
-    for version, burst in zip(VERSIONS, sorted_bursts):
-        if version.important:
-            print(version.id, burst.granule)
-            important_versions.append(burst)
-
-    for burst in important_versions:
-        asf.download_url(burst.metadata_url, path='.', filename=burst.metadata_path.name)
-
-
-def download_representative_support(important_only=True):
-    slcs = [f'{burst.slc_granule}-SLC' for burst in find_representative_bursts(important_only=important_only)]
-    slc_results = asf.granule_search(slcs)
-    slc_results.download('.')
-    slc_paths = sorted(list(Path().glob('*.zip')))
+def download_representative_support(workdir):
+    slcs = [f'{burst.slc_granule}-SLC' for burst, _ in find_representative_bursts(important_only=True)]
+    slc_paths = download_slcs(slcs, workdir)
     for slc_path in slc_paths:
-        extract_support_folder(slc_path)
+        extract_support_folder(slc_path, workdir)
+
+
+def main():
+    workflows = ['identify_changing_versions', 'download_representative_support', 'find_representative_bursts']
+    parser = argparse.ArgumentParser(description='Identify differences in Sentinel-1 IPF versions.')
+    parser.add_argument('workflow', choices=workflows)
+    parser.add_argument('--outdir', type=str, default='.', help='Output directory for downloaded files')
+    args = parser.parse_args()
+
+    args.outdir = Path(args.outdir)
+    args.outdir.mkdir(exist_ok=True, parents=True)
+    assert args.workflow in workflows, f'Unknown workflow: {args.workflow}'
+
+    if args.workflow == 'identify_changing_versions':
+        identify_changing_versions(workdir=args.outdir)
+    elif args.workflow == 'download_representative_support':
+        download_representative_support(workdir=args.outdir)
+    elif args.workflow == 'find_representative_bursts':
+        bursts, versions = find_representative_bursts(important_only=True)
+        for burst, version in zip(bursts, versions):
+            print(f'Found burst: {burst.granule} with version {version}')
 
 
 if __name__ == '__main__':
-    # identify_changing_versions()
-    # download_changing_metadata()
-    download_representative_support(important_only=False)
+    main()
