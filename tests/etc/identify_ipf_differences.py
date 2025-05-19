@@ -70,7 +70,7 @@ def find_representative_bursts(important_only=False):
         if len(matching_version) == 0:
             print(f'No bursts with version {version.id} found')
             continue
-        burst_infos.append(get_burst_infos(matching_version[:1], Path.cwd())[0])
+        burst_infos.append(get_burst_infos([matching_version[len(matching_version) // 2]], Path.cwd())[0])
         versions.append(version.id)
     return burst_infos, versions
 
