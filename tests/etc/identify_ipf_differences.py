@@ -111,12 +111,12 @@ def extract_support_folder(slc_path, workdir):
                     shutil.copyfileobj(source_file, target_file)
 
 
-def create_diffs():
-    supports = sorted(Path().glob('support*'))
+def create_diffs(workdir):
+    supports = sorted(workdir.glob('support*'))
     for i in range(len(supports) - 1):
         support1 = supports[i]
         support2 = supports[i + 1]
-        diff_file = Path(f'diff_{support1.name}_{support2.name}.txt')
+        diff_file = workdir / Path(f'diff_{support1.name}_{support2.name}.txt')
         diff_file.touch()
         os.system(f'git diff --no-index {support1} {support2} > {diff_file}')
 
@@ -131,18 +131,18 @@ def get_changes(workdir):
 
 
 def identify_changing_versions(workdir):
-    slcs = [f'{burst.slc_granule}-SLC' for burst, _ in find_representative_bursts(important_only=False)]
+    slcs = [f'{burst.slc_granule}-SLC' for burst in find_representative_bursts(important_only=False)[0]]
     slc_paths = download_slcs(slcs, workdir)
     for slc_path in slc_paths:
         extract_support_folder(slc_path, workdir)
-    create_diffs()
+    create_diffs(workdir)
     has_changes = get_changes(workdir)
     print('Files with changes:')
     [print(file) for file in has_changes]
 
 
 def download_representative_support(workdir):
-    slcs = [f'{burst.slc_granule}-SLC' for burst, _ in find_representative_bursts(important_only=True)]
+    slcs = [f'{burst.slc_granule}-SLC' for burst in find_representative_bursts(important_only=True)[0]]
     slc_paths = download_slcs(slcs, workdir)
     for slc_path in slc_paths:
         extract_support_folder(slc_path, workdir)
