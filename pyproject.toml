@@ -92,6 +92,12 @@ convention = "google"
 case-sensitive = true
 lines-after-imports = 2
 
+[tool.ruff.lint.flake8-annotations]
+suppress-dummy-args = true
+
+[tool.ruff.lint.extend-per-file-ignores]
+"tests/*" = ["D1", "ANN"]
+
 [tool.mypy]
 python_version = "3.9"
 warn_redundant_casts = true

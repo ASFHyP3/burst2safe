@@ -17,5 +17,5 @@ dependencies:
   - pytest
   - pytest-cov
   - pytest-dependency
-  - ruff
-  - mypy
+  - pip:
+    - -r requirements-static.txt
