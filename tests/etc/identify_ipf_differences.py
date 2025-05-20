@@ -123,10 +123,7 @@ def create_diffs(workdir):
 
 def get_changes(workdir):
     files = sorted(list(workdir.glob('diff_support*txt')))
-    has_changes = []
-    for file in files:
-        if os.path.getsize(file) > 0:
-            has_changes.append(file.name)
+    has_changes = [file.name for file in files if os.path.getsize(file) > 0]
     return has_changes
 
 
