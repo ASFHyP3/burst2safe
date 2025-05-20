@@ -1,6 +1,18 @@
-"""Identify differences in Sentinel-1 IPF versions by downloading representative SLCs and extracting support files.
+"""Utilities for adding new IPF version compatibility.
 
-IPF list: https://sar-mpc.eu/processor/ipf/
+This script contains workflows for identifying changes in SAFE files related to IPF version upgrades.
+This includes three work flows.
+
+IDENTIFY_CHANGING_VERSIONS:
+    Identifies IPF versions that changed the SAFE dataset structure by looking at the XML template support files.
+
+DOWNLOAD_REPRESENTATIVE_SUPPORT:
+    Downloads the XML template files associated with important versions so they can used for SAFE creation/testing.
+
+FIND_REPRESENTATIVE_BURSTS:
+    Identifies a set of bursts that contains a burst from each important IPF version (for testing).
+
+IPF Changelog: https://sar-mpc.eu/processor/ipf/
 """
 
 import argparse
@@ -147,7 +159,7 @@ def download_representative_support(workdir):
 
 def main():
     workflows = ['identify_changing_versions', 'download_representative_support', 'find_representative_bursts']
-    parser = argparse.ArgumentParser(description='Identify differences in Sentinel-1 IPF versions.')
+    parser = argparse.ArgumentParser(description='Utilities for adding new IPF version compatibility.')
     parser.add_argument('workflow', choices=workflows)
     parser.add_argument('--outdir', type=str, default='.', help='Output directory for downloaded files')
     args = parser.parse_args()
