@@ -144,7 +144,7 @@ class Safe:
         assert self.burst_infos[0].slc_granule is not None
         platform, beam_mode, product_type = self.burst_infos[0].slc_granule.split('_')[:3]
 
-        pol_codes = {'HH': 'SH', 'VV': 'SV', 'VH': 'SV', 'HV': 'SV', 'HH_HV': 'DH', 'VH_VV': 'DV'}
+        pol_codes = {'HH': 'SH', 'VV': 'SV', 'VH': 'VH', 'HV': 'HV', 'HH_HV': 'DH', 'VH_VV': 'DV'}
         pols = sorted(list(set([x.polarization for x in self.burst_infos])))
         pol_code = pol_codes['_'.join(pols)]
         product_info = f'1S{pol_code}'
