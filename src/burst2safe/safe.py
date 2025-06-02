@@ -204,7 +204,7 @@ class Safe:
         """
         bboxs = MultiPolygon([swath.bbox for swath in self.swaths])
         min_rotated_rect = bboxs.minimum_rotated_rectangle
-        bbox = Polygon(min_rotated_rect.exterior)
+        bbox = Polygon(min_rotated_rect.exterior)  # type: ignore[attr-defined]
         return bbox
 
     def create_dir_structure(self) -> None:

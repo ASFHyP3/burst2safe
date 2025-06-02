@@ -49,6 +49,7 @@ def burst2stack(
         keep_files: Keep the intermediate files
         work_dir: The directory to create the SAFE in (default: current directory)
     """
+    assert extent is not None
     burst_search_results = find_group(
         rel_orbit,
         extent,

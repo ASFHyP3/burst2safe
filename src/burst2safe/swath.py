@@ -125,7 +125,7 @@ class Swath:
         """
         points = MultiPoint([(gcp.x, gcp.y) for gcp in self.product.gcps])
         min_rotated_rect = points.minimum_rotated_rectangle
-        bbox = Polygon(min_rotated_rect.exterior)
+        bbox = Polygon(min_rotated_rect.exterior)  # type: ignore[attr-defined]
         return bbox
 
     def assemble(self):
