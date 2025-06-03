@@ -48,22 +48,17 @@ class Rfi(Annotation):
         assert self.rfi_mitigation_applied is not None
         assert self.rfi_burst_report_list is not None
 
-        rfi_mitigation=False
-        try:
+        if self.rfi_mitigation_applied.text=='None':
+            warnings.warn('RFI mitigation has not been applied')
+        else:
             self.create_rfi_detection_from_noise_report_list()
             assert self.rfi_detection_from_noise_report_list is not None
-            rfi_mitigation=True
-        except AttributeError as e:
-            if "'NoneType' object has no attribute 'tag'" in str(e):
-                warnings.warn('RFI detection from noise report not found')
-            else:
-                raise
 
         rfi = ET.Element('rfi')
         rfi.append(self.ads_header)
         rfi.append(self.rfi_mitigation_applied)
         rfi.append(self.rfi_burst_report_list)
-        if rfi_mitigation:
+        if not self.rfi_mitigation_applied.text=='None':
             rfi.append(self.rfi_detection_from_noise_report_list)
         rfi_tree = ET.ElementTree(rfi)
 
