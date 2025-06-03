@@ -57,9 +57,10 @@ class Rfi(Annotation):
         rfi = ET.Element('rfi')
         rfi.append(self.ads_header)
         rfi.append(self.rfi_mitigation_applied)
-        rfi.append(self.rfi_burst_report_list)
         if not self.rfi_mitigation_applied.text=='None':
             rfi.append(self.rfi_detection_from_noise_report_list)
+        rfi.append(self.rfi_burst_report_list)
+        
         rfi_tree = ET.ElementTree(rfi)
 
         ET.indent(rfi_tree, space='  ')
