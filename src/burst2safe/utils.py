@@ -1,5 +1,6 @@
 # mypy: disable-error-code="union-attr"
 import json
+import logging
 import warnings
 from argparse import Namespace
 from binascii import crc_hqx
@@ -16,7 +17,8 @@ from shapely.geometry import box, shape
 
 
 gdal.UseExceptions()
-warnings.filterwarnings('ignore')
+asf_logger = logging.getLogger(S1BurstProduct.__name__)
+asf_logger.disabled = True
 
 
 @dataclass
@@ -318,11 +320,10 @@ def reparse_args(args: Namespace, tool: str) -> Namespace:
             args.swaths = [swath.upper() for swath in args.swaths]
 
         if args.extent:
-            try:
-                args.extent = box(*[float(x) for x in args.extent])  # type: ignore[arg-type]
-            except ValueError:
-                args.extent = vector_to_shapely_latlon_polygon(args.extent[0])
-            except ValueError:  # FIXME: this does nothing, see https://github.com/ASFHyP3/burst2safe/issues/129
+            if not (len(args.extent)==4 or len(args.extent)==1):
                 raise ValueError('--extent cannot be interpreted as a bounding box or geometry file.')
-
+            elif len(args.extent)==4:
+                args.extent = box(*[float(x) for x in args.extent])  # type: ignore[arg-type]
+            else:
+                args.extent = vector_to_shapely_latlon_polygon(args.extent[0])
     return args
