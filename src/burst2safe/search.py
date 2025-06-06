@@ -1,5 +1,4 @@
 import logging
-import warnings
 from collections.abc import Iterable
 from datetime import datetime
 from itertools import product
