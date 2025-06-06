@@ -1,3 +1,4 @@
+import logging
 import warnings
 from collections.abc import Iterable
 from datetime import datetime
@@ -10,7 +11,8 @@ from asf_search.Products.S1BurstProduct import S1BurstProduct
 from shapely.geometry import Polygon
 
 
-warnings.filterwarnings('ignore')
+asf_logger = logging.getLogger(asf_search.__name__)
+asf_logger.disabled = True
 
 
 def find_granules(granules: Iterable[str]) -> List[S1BurstProduct]:
