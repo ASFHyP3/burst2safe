@@ -320,9 +320,9 @@ def reparse_args(args: Namespace, tool: str) -> Namespace:
             args.swaths = [swath.upper() for swath in args.swaths]
 
         if args.extent:
-            if not (len(args.extent)==4 or len(args.extent)==1):
+            if not (len(args.extent) == 4 or len(args.extent) == 1):
                 raise ValueError('--extent cannot be interpreted as a bounding box or geometry file.')
-            elif len(args.extent)==4:
+            elif len(args.extent) == 4:
                 args.extent = box(*[float(x) for x in args.extent])  # type: ignore[arg-type]
             else:
                 args.extent = vector_to_shapely_latlon_polygon(args.extent[0])
