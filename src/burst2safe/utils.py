@@ -1,7 +1,6 @@
 # mypy: disable-error-code="union-attr"
 import json
 import logging
-import warnings
 from argparse import Namespace
 from binascii import crc_hqx
 from collections.abc import Iterable
