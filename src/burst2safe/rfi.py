@@ -1,3 +1,4 @@
+import warnings
 from copy import deepcopy
 from typing import Optional
 
@@ -42,18 +43,24 @@ class Rfi(Annotation):
         """Assemble the RFI object components."""
         self.create_ads_header()
         self.create_rfi_mitigation_applied()
-        self.create_rfi_detection_from_noise_report_list()
         self.create_rfi_burst_report_list()
-
-        rfi = ET.Element('rfi')
         assert self.ads_header is not None
         assert self.rfi_mitigation_applied is not None
-        assert self.rfi_detection_from_noise_report_list is not None
         assert self.rfi_burst_report_list is not None
+
+        if self.rfi_mitigation_applied.text=='None':
+            warnings.warn('RFI mitigation has not been applied')
+        else:
+            self.create_rfi_detection_from_noise_report_list()
+            assert self.rfi_detection_from_noise_report_list is not None
+
+        rfi = ET.Element('rfi')
         rfi.append(self.ads_header)
         rfi.append(self.rfi_mitigation_applied)
-        rfi.append(self.rfi_detection_from_noise_report_list)
+        if not self.rfi_mitigation_applied.text=='None':
+            rfi.append(self.rfi_detection_from_noise_report_list)
         rfi.append(self.rfi_burst_report_list)
+        
         rfi_tree = ET.ElementTree(rfi)
 
         ET.indent(rfi_tree, space='  ')
