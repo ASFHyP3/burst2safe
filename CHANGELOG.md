@@ -11,6 +11,7 @@ and uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 ### Fixed
 * `burst2safe.download.download_bursts_async()` now makes a single Earthdata Login authorization request prior to
   downloading individual burst products and re-uses the same session cookie for each download. Fixes https://github.com/ASFHyP3/burst2safe/issues/170.
+* The `--extent` option of `burst2stack` is now required.
 
 ## [1.4.4]
 
