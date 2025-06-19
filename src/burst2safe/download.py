@@ -95,11 +95,10 @@ async def download_bursts_async(url_dict: dict) -> None:
     auth_type = check_earthdata_credentials(append=True)
     headers = {'Authorization': f'Bearer {os.getenv(TOKEN_ENV_VAR)}'} if auth_type == 'token' else {}
     async with aiohttp.ClientSession(headers=headers, trust_env=True) as session:
-        if auth_type == 'token':
-            # FIXME: Needed while burst extractor API doesn't support EDL tokens
-            cookie_response = await session.get(COOKIE_URL)
-            cookie_response.raise_for_status()
-            cookie_response.close()
+        # FIXME: once burst extractor API supports EDL tokens this cookie request can be skipped when auth_type='token'
+        cookie_response = await session.get(COOKIE_URL)
+        cookie_response.raise_for_status()
+        cookie_response.close()
 
         tasks = []
         for file_path, url in url_dict.items():
