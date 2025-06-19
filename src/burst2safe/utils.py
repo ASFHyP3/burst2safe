@@ -319,10 +319,10 @@ def reparse_args(args: Namespace, tool: str) -> Namespace:
 
         if args.extent:
             try:
-                args.extent = box(*[float(x) for x in args.extent])
+                args.extent = box(*[float(x) for x in args.extent])  # type: ignore[arg-type]
             except ValueError:
                 args.extent = vector_to_shapely_latlon_polygon(args.extent[0])
-            except ValueError:
+            except ValueError:  # FIXME: this does nothing, see https://github.com/ASFHyP3/burst2safe/issues/129
                 raise ValueError('--extent cannot be interpreted as a bounding box or geometry file.')
 
     return args

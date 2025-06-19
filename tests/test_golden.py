@@ -25,7 +25,7 @@ def test_burst2safe_iw():
     burst2safe(
         granules=[],
         orbit=51936,
-        extent=box(*[-117.3, 35.5, -117.2, 35.6]),
+        extent=box(-117.3, 35.5, -117.2, 35.6),
         polarizations=['VV', 'VH'],
         keep_files=False,
         work_dir=work_path,
@@ -40,7 +40,7 @@ def test_burst2safe_ew():
     burst2safe(
         granules=[],
         orbit=54631,
-        extent=box(*[-53.6, 66.6, -53.3, 66.8]),
+        extent=box(-53.6, 66.6, -53.3, 66.8),
         polarizations=['HH', 'HV'],
         mode='EW',
         keep_files=False,

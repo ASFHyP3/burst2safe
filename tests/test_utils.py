@@ -144,7 +144,7 @@ def test_drop_duplicates():
 
 
 def create_polygon(out_path: Path, bounds: Iterable[Iterable[float]], epsg: int = 4326):
-    polygons = [box(*bound) for bound in bounds]
+    polygons = [box(*bound) for bound in bounds]  # type: ignore[arg-type]
     driver = ogr.GetDriverByName('GeoJSON')
 
     srs = osr.SpatialReference()
@@ -199,7 +199,7 @@ def test_reparse_args_burst2safe():
     out_args = utils.reparse_args(args3, 'burst2safe')  # type: ignore[arg-type]
     assert out_args.pols == ['VV']
     assert out_args.swaths == ['IW1']
-    assert out_args.extent == box(*[0, 0, 1, 1])
+    assert out_args.extent == box(0, 0, 1, 1)
 
     granules = ['S1_136231_IW2_20200604T022312_VV_7C85-BURST', 'S1_136232_IW2_20200604T022315_VV_7C85-BURST']
     args4 = MockArgs(granules=granules)
@@ -229,4 +229,4 @@ def test_reparse_args_burst2stack():
     assert out_args.end_date == datetime.fromisoformat('2021-02-01')
     assert out_args.pols == ['VV']
     assert out_args.swaths == ['IW1']
-    assert out_args.extent == box(*[0, 0, 1, 1])
+    assert out_args.extent == box(0, 0, 1, 1)
