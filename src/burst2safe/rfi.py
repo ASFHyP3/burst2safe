@@ -1,3 +1,4 @@
+import warnings
 from copy import deepcopy
 from typing import Optional
 
@@ -32,7 +33,10 @@ class Rfi(Annotation):
 
     def create_rfi_detection_from_noise_report_list(self):
         """Create the rfiDetectionFromNoiseReportList element."""
-        self.rfi_detection_from_noise_report_list = self.merge_lists('rfiDetectionFromNoiseReportList')
+        try:
+            self.rfi_detection_from_noise_report_list = self.merge_lists('rfiDetectionFromNoiseReportList')
+        except AttributeError:
+            warnings.warn('RFI detections from noise reports not found', UserWarning)
 
     def create_rfi_burst_report_list(self):
         """Create the rfiBurstReportList element."""
@@ -48,12 +52,13 @@ class Rfi(Annotation):
         rfi = ET.Element('rfi')
         assert self.ads_header is not None
         assert self.rfi_mitigation_applied is not None
-        assert self.rfi_detection_from_noise_report_list is not None
         assert self.rfi_burst_report_list is not None
         rfi.append(self.ads_header)
         rfi.append(self.rfi_mitigation_applied)
-        rfi.append(self.rfi_detection_from_noise_report_list)
+        if not self.rfi_mitigation_applied.text=='None':
+            rfi.append(self.rfi_detection_from_noise_report_list)
         rfi.append(self.rfi_burst_report_list)
+        
         rfi_tree = ET.ElementTree(rfi)
 
         ET.indent(rfi_tree, space='  ')

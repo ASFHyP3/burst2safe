@@ -14,6 +14,7 @@ and uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 ### Fixed
 * Removed `warnings.filterwarnings('ignore')` and replacing it by disabling the `asf_search` logger. Fixes https://github.com/ASFHyP3/burst2safe/issues/160
 * Avoid catching ValueError exception twice. Fixes https://github.com/ASFHyP3/burst2safe/issues/129
+* Allow burst without RFI detection from noise report. Fixes https://github.com/ASFHyP3/burst2safe/issues/133
 
 ## [1.4.5]
 
