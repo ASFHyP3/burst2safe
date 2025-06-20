@@ -53,6 +53,7 @@ class Rfi(Annotation):
         rfi = ET.Element('rfi')
         assert self.ads_header is not None
         assert self.rfi_mitigation_applied is not None
+        assert self.rfi_detection_from_noise_report_list is not None
         assert self.rfi_burst_report_list is not None
         rfi.append(self.ads_header)
         rfi.append(self.rfi_mitigation_applied)
