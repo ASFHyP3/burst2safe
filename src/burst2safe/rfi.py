@@ -56,6 +56,7 @@ class Rfi(Annotation):
         rfi.append(self.ads_header)
         rfi.append(self.rfi_mitigation_applied)
         if not self.rfi_mitigation_applied.text == 'None':
+            assert self.rfi_detection_from_noise_report_list is not None
             rfi.append(self.rfi_detection_from_noise_report_list)
         rfi.append(self.rfi_burst_report_list)
         rfi_tree = ET.ElementTree(rfi)
