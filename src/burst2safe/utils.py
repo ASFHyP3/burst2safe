@@ -320,7 +320,7 @@ def reparse_args(args: Namespace, tool: str) -> Namespace:
 
         if args.extent:
             if not (len(args.extent) == 4 or len(args.extent) == 1):
-                raise ValueError('--extent cannot be interpreted as a bounding box or geometry file.')
+                raise ValueError('The argument provided to --extent could not be interpreted as a bounding box (W S E N in lat/lon) or a geometry file.')
             elif len(args.extent) == 4:
                 args.extent = box(*[float(x) for x in args.extent])  # type: ignore[arg-type]
             else:
