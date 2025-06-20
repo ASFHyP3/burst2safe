@@ -10,10 +10,10 @@ and uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ### Changed
 * Upgraded aiohttp library to >=3.12.6, avoiding wrong requests in asynchronous tasks.
-* Removed `warnings.filterwarnings('ignore')` and replacing it by disabling the `asf_search` logger.
 
 ### Fixed
-* Avoid catching ValueError exception twice.
+* Removed `warnings.filterwarnings('ignore')` and replacing it by disabling the `asf_search` logger. Fixes https://github.com/ASFHyP3/burst2safe/issues/160
+* Avoid catching ValueError exception twice. Fixes https://github.com/ASFHyP3/burst2safe/issues/129
 
 ## [1.4.5]
 
