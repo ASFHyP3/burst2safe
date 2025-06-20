@@ -36,7 +36,6 @@ class Rfi(Annotation):
         try:
             self.rfi_detection_from_noise_report_list = self.merge_lists('rfiDetectionFromNoiseReportList')
         except AttributeError:
-            self.rfi_detection_from_noise_report_list = ET.Element('None')
             warnings.warn('RFI detections from noise reports not found', UserWarning)
 
     def create_rfi_burst_report_list(self):
@@ -53,11 +52,11 @@ class Rfi(Annotation):
         rfi = ET.Element('rfi')
         assert self.ads_header is not None
         assert self.rfi_mitigation_applied is not None
-        assert self.rfi_detection_from_noise_report_list is not None
         assert self.rfi_burst_report_list is not None
         rfi.append(self.ads_header)
         rfi.append(self.rfi_mitigation_applied)
         if not self.rfi_mitigation_applied.text == 'None':
+            assert self.rfi_detection_from_noise_report_list is not None
             rfi.append(self.rfi_detection_from_noise_report_list)
         rfi.append(self.rfi_burst_report_list)
         rfi_tree = ET.ElementTree(rfi)
