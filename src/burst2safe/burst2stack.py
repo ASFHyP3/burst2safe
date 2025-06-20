@@ -21,10 +21,10 @@ an extent, and polarization(s).
 
 
 def burst2stack(
+    extent: Polygon,
     rel_orbit: Optional[int] = None,
     start_date: Optional[datetime] = None,
     end_date: Optional[datetime] = None,
-    extent: Optional[Polygon] = None,
     polarizations: Optional[list[str]] = None,
     swaths: Optional[list[str]] = None,
     mode: str = 'IW',
@@ -49,7 +49,6 @@ def burst2stack(
         keep_files: Keep the intermediate files
         work_dir: The directory to create the SAFE in (default: current directory)
     """
-    assert extent is not None
     burst_search_results = find_group(
         rel_orbit,
         extent,
@@ -100,6 +99,7 @@ def main() -> None:
         type=str,
         nargs='+',
         help='Bounds (W S E N in lat/lon) or geometry file describing spatial extent',
+        required=True,
     )
     parser.add_argument('--pols', type=str, nargs='+', help='Plarizations of the bursts (i.e., VV VH)')
     parser.add_argument('--swaths', type=str, nargs='+', help='Swaths of the bursts (i.e., IW1 IW2 IW3)')
