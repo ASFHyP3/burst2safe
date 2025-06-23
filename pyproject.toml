@@ -35,7 +35,7 @@ classifiers=[
 ]
 dependencies = [
   "gdal",
-  "shapely>=2",
+  "shapely>=2.1",
   "numpy",
   "lxml",
   "tifffile>=2022.04.22",
