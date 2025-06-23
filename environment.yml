@@ -7,7 +7,7 @@ dependencies:
   - pip
   - gdal
   - shapely>=2
-  - numpy<2.1.0
+  - numpy
   - lxml
   - tifffile>=2022.04.22
   - asf_search
