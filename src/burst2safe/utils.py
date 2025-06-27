@@ -276,7 +276,7 @@ def vector_to_shapely_latlon_polygon(vector_file_path):
     return polygon
 
 
-def get_bbox(extent: List) -> List[float]:
+def get_bbox(extent):
     """Returns the extent if it meets the requirements
 
     Args:
