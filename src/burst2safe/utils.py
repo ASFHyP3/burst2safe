@@ -298,7 +298,7 @@ def get_bbox(extent):
     elif float(extent[1]) >= float(extent[3]):
         raise ValueError('The south latitude is larger than the north latitude')
     else:
-        return box(*[float(x) for x in extent], ccw=True)
+        return box(*[float(x) for x in extent])  # type: ignore[arg-type]
 
 
 def reparse_args(args: Namespace, tool: str) -> Namespace:
