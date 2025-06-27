@@ -276,6 +276,31 @@ def vector_to_shapely_latlon_polygon(vector_file_path):
     return polygon
 
 
+def get_bbox(extent: List) -> bool:
+    """Returns the extent if it meets the requirements
+
+    Args:
+        extent: lat/lon list in the format (W S E N)
+
+    Returns:
+        Bounding box
+    """
+    if not all(item.count('.') <= 1 and item.count('-') <= 1 for item in extent):
+        raise ValueError('One item in the extent has multiple points')
+    elif not all(item.replace('.', '').replace('-', '').isdigit() for item in extent):
+        raise ValueError('One item in the extent is not a number')
+    elif not (abs(float(extent[0])) <= 180 and abs(float(extent[2])) <= 180):
+        raise ValueError('The longitudes are not between -180 and 180')
+    elif float(extent[0]) >= float(extent[2]):
+        raise ValueError('The west longitude is larger than the east longitude')
+    elif not (abs(float(extent[1])) <= 90 and abs(float(extent[3])) <= 90):
+        raise ValueError('The latitudes are not between -90 and 90')
+    elif float(extent[1]) >= float(extent[3]):
+        raise ValueError('The south latitude is larger than the north latitude')
+    else:
+        return box(*[float(x) for x in extent])
+
+
 def reparse_args(args: Namespace, tool: str) -> Namespace:
     """Parse the arguments for burst2safe and burst2stack CLIs.
 
@@ -319,12 +344,12 @@ def reparse_args(args: Namespace, tool: str) -> Namespace:
             args.swaths = [swath.upper() for swath in args.swaths]
 
         if args.extent:
-            if not (len(args.extent) == 4 or len(args.extent) == 1):
+            if len(args.extent) == 1:
+                args.extent = vector_to_shapely_latlon_polygon(args.extent[0])
+            elif len(args.extent) == 4:
+                args.extent = get_bbox(args.extent)
+            else:
                 raise ValueError(
                     'The argument provided to --extent could not be interpreted as a bounding box (W S E N in lat/lon) or a geometry file.'
                 )
-            elif len(args.extent) == 4:
-                args.extent = box(*[float(x) for x in args.extent])  # type: ignore[arg-type]
-            else:
-                args.extent = vector_to_shapely_latlon_polygon(args.extent[0])
     return args
