@@ -113,11 +113,7 @@ class Safe:
         hole_count = 0
 
         # 8-connectivity
-        directions = [
-            (-1, -1), (-1, 0), (-1, 1),
-            ( 0, -1),          ( 0, 1),
-            ( 1, -1), ( 1, 0), ( 1, 1)
-            ]
+        directions = [(-1, -1), (-1, 0), (-1, 1), (0, -1), (0, 1), (1, -1), (1, 0), (1, 1)]
 
         for r in range(nrows):
             for c in range(ncols):
@@ -139,7 +135,7 @@ class Safe:
                                     visited[ny, nx] = True
                                     queue.append((ny, nx))
                 else:  # False → possible hole
-                    touches_border = (r == 0 or r == nrows-1 or c == 0 or c == ncols-1)
+                    touches_border = r == 0 or r == nrows - 1 or c == 0 or c == ncols - 1
                     region = [(r, c)]
                     while queue:
                         y, x = queue.popleft()
@@ -150,14 +146,14 @@ class Safe:
                                     visited[ny, nx] = True
                                     queue.append((ny, nx))
                                     region.append((ny, nx))
-                                    if ny == 0 or ny == nrows-1 or nx == 0 or nx == ncols-1:
+                                    if ny == 0 or ny == nrows - 1 or nx == 0 or nx == ncols - 1:
                                         touches_border = True
                     if not touches_border:
                         hole_count += 1
         if component_count > 1 or hole_count > 0:
             msg = (
-                "Multiburst collections must be comprised of a single connected component and have no holes.\n"
-                f"Connected Components: {component_count}, Holes: {hole_count}"
+                'Multiburst collections must be comprised of a single connected component and have no holes.\n'
+                f'Connected Components: {component_count}, Holes: {hole_count}'
             )
             raise ValueError(msg)
 
@@ -174,22 +170,22 @@ class Safe:
         """
         burst_ids = sorted([b for b in {info.burst_id for info in burst_infos} if b is not None])
         if not burst_ids:
-            raise ValueError("No burst IDs found in any BurstInfo")
+            raise ValueError('No burst IDs found in any BurstInfo')
 
         # fail fast
         expected_burst_ids = list(range(min(burst_ids), max(burst_ids) + 1))
         if burst_ids != expected_burst_ids:
-            raise ValueError(f"There can be no gaps in burst IDs accross a collection of bursts. Found: {burst_ids}")
+            raise ValueError(f'There can be no gaps in burst IDs accross a collection of bursts. Found: {burst_ids}')
 
         burst_swath_mask = []
         for burst in burst_ids:
             burst_info = [info for info in burst_infos if burst == info.burst_id]
             burst_swaths = list(set([i.swath for i in burst_info]))
             swath_mask = [
-                any("1" in i for i in burst_swaths),
-                any("2" in i for i in burst_swaths),
-                any("3" in i for i in burst_swaths)
-                ]
+                any('1' in i for i in burst_swaths),
+                any('2' in i for i in burst_swaths),
+                any('3' in i for i in burst_swaths),
+            ]
             burst_swath_mask.append(swath_mask)
         return np.array(burst_swath_mask)
 
@@ -238,16 +234,6 @@ class Safe:
 
         if len(swaths) == 1:
             return
-
-        swath_combos = [[swaths[i], swaths[i + 1]] for i in range(len(swaths) - 1)]
-        working_pol = polarizations[0]
-        for swath1, swath2 in swath_combos:
-            min_diff = burst_range[swath1][working_pol][0] - burst_range[swath2][working_pol][0]
-            if np.abs(min_diff) > 1:
-                raise ValueError(f'Products from swaths {swath1} and {swath2} do not overlap')
-            max_diff = burst_range[swath1][working_pol][1] - burst_range[swath2][working_pol][1]
-            if np.abs(max_diff) > 1:
-                raise ValueError(f'Products from swaths {swath1} and {swath2} do not overlap')
 
     def get_name(self, unique_id: str = '0000') -> str:
         """Create a name for the SAFE file.

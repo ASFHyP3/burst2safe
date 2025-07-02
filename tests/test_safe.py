@@ -42,7 +42,9 @@ class TestSafe:
             Safe.check_group_validity(different_polarization_ends)  # type: ignore[arg-type]
 
         swath_nonoverlap = [burst1, BurstStub(*burst2._replace(burst_id=3))]
-        with pytest.raises(ValueError, match='Products from swaths IW1 and IW2 do not overlap'):
+        with pytest.raises(
+            ValueError, match='There can be no gaps in burst IDs accross a collection of bursts. Found:.*'
+        ):
             Safe.check_group_validity(swath_nonoverlap)  # type: ignore[arg-type]
 
     def test_get_name(self, burst_infos, tmp_path):
