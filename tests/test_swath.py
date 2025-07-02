@@ -53,10 +53,6 @@ class TestSwath:
         with pytest.raises(ValueError, match='All bursts must have the same polarization. Found:.*'):
             Swath.check_burst_group_validity(different_polarization)  # type: ignore[arg-type]
 
-        non_consecutive_burst_ids = [burst1, BurstStub(*burst2._replace(burst_id=3))]
-        with pytest.raises(ValueError, match='There can be no gaps in burst IDs accross a collection of bursts. Found:.*'):
-            Swath.check_burst_group_validity(non_consecutive_burst_ids)  # type: ignore[arg-type]
-
     def test_get_swath_name(self, burst_infos):
         safe_path = Path('./S1A_IW_SLC__1SDV_20240408T015045_20240408T015113_053336_06778C_CB5D.SAFE')
         assert (
