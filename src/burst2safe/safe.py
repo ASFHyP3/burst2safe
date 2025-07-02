@@ -1,5 +1,6 @@
 import bisect
 import shutil
+from collections import deque
 from collections.abc import Iterable
 from datetime import datetime
 from itertools import product
@@ -81,6 +82,115 @@ class Safe:
         return data_dir / f'support_{support_version}'
 
     @staticmethod
+    def count_components_and_holes(burst_swath_mask: np.array) -> None:
+        """
+        Performs a BFS search to count connected components and holes
+
+        This could be simplified by using scipy or Networkxx for BFS,
+        but this avoids adding either as a required dependency
+
+        The collection defined by the following mask would be invalid,
+        as it contains 2 connected components and a single hole:
+
+        example_burst_swath_mask = [
+            [1, 0, 1],
+            [0, 0, 1],
+            [1, 1, 1],
+            [1, 0, 1],
+            [1, 1, 1]
+        ]
+
+        Args:
+            burst_swath_mask: A mask that encodes the toplogy of included bursts and swaths.
+                Burst and swath IDs are irrelavent and not included in the mask because this
+                method simply identifies the quantity of connected components and holes.
+        """
+        visited = np.zeros_like(burst_swath_mask, dtype=bool)
+        nrows, ncols = burst_swath_mask.shape
+
+        component_count = 0
+        hole_count = 0
+
+        # 8-connectivity
+        directions = [
+            (-1, -1), (-1, 0), (-1, 1),
+            ( 0, -1),          ( 0, 1),
+            ( 1, -1), ( 1, 0), ( 1, 1)
+            ]
+
+        for r in range(nrows):
+            for c in range(ncols):
+                if visited[r, c]:
+                    continue
+
+                queue = deque([(r, c)])
+                visited[r, c] = True
+                value = burst_swath_mask[r, c]
+
+                if value:  # True → part of a component
+                    component_count += 1
+                    while queue:
+                        y, x = queue.popleft()
+                        for dy, dx in directions:
+                            ny, nx = y + dy, x + dx
+                            if 0 <= ny < nrows and 0 <= nx < ncols:
+                                if burst_swath_mask[ny, nx] and not visited[ny, nx]:
+                                    visited[ny, nx] = True
+                                    queue.append((ny, nx))
+                else:  # False → possible hole
+                    touches_border = (r == 0 or r == nrows-1 or c == 0 or c == ncols-1)
+                    region = [(r, c)]
+                    while queue:
+                        y, x = queue.popleft()
+                        for dy, dx in directions:
+                            ny, nx = y + dy, x + dx
+                            if 0 <= ny < nrows and 0 <= nx < ncols:
+                                if not burst_swath_mask[ny, nx] and not visited[ny, nx]:
+                                    visited[ny, nx] = True
+                                    queue.append((ny, nx))
+                                    region.append((ny, nx))
+                                    if ny == 0 or ny == nrows-1 or nx == 0 or nx == ncols-1:
+                                        touches_border = True
+                    if not touches_border:
+                        hole_count += 1
+        if component_count > 1 or hole_count > 0:
+            msg = (
+                "Multiburst collections must be comprised of a single connected component and have no holes.\n"
+                f"Connected Components: {component_count}, Holes: {hole_count}"
+            )
+            raise ValueError(msg)
+
+    @staticmethod
+    def make_burst_swath_mask(burst_infos: Iterable[BurstInfo]) -> np.array:
+        """
+        Creates a mask of bursts/swaths included in a burst collection.
+        Useful when using a BFS to identify invalid topologies in collections of bursts.
+
+        Args:
+            burst_infos: A list of BurstInfo objects
+
+        Returns: np.array representing a truth table for included bursts
+        """
+        burst_ids = sorted(list(set([info.burst_id for info in burst_infos])))
+
+        # fail fast
+        expected_burst_ids = list(range(min(burst_ids), max(burst_ids) + 1))
+        if burst_ids != expected_burst_ids:
+            raise ValueError(f"There can be no gaps in burst IDs accross a collection of bursts. Burst IDs: {burst_ids}")
+
+        burst_swath_mask = []
+        for burst in burst_ids:
+            burst_info = [info for info in burst_infos if burst == info.burst_id]
+            burst_swaths = list(set([i.swath for i in burst_info]))
+            swath_mask = [
+                any("1" in i for i in burst_swaths),
+                any("2" in i for i in burst_swaths),
+                any("3" in i for i in burst_swaths)
+                ]
+            burst_swath_mask.append(swath_mask)
+        return np.array(burst_swath_mask)
+
+    @staticmethod
     def check_group_validity(burst_infos: Iterable[BurstInfo]) -> None:
         """Check that the burst group is valid.
 
@@ -93,6 +203,11 @@ class Safe:
         Args:
             burst_infos: A list of BurstInfo objects
         """
+
+        # identify holes and disconnected collections of bursts
+        burst_swath_mask = Safe.make_burst_swath_mask(burst_infos)
+        Safe.count_components_and_holes(burst_swath_mask)
+
         swaths = sorted(list(set([info.swath for info in burst_infos])))
         polarizations = sorted(list(set([info.polarization for info in burst_infos])))
         burst_range: dict = {}

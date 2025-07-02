@@ -92,8 +92,6 @@ class Swath:
 
         burst_ids = [cast(int, x.burst_id) for x in burst_infos]
         burst_ids.sort()
-        if burst_ids != list(range(min(burst_ids), max(burst_ids) + 1)):
-            raise ValueError(f'All bursts must have consecutive burst IDs. Found: {burst_ids}.')
 
     @staticmethod
     def get_swath_name(burst_infos: list[BurstInfo], safe_path: Path, image_number: int) -> str:
