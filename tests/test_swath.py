@@ -54,7 +54,7 @@ class TestSwath:
             Swath.check_burst_group_validity(different_polarization)  # type: ignore[arg-type]
 
         non_consecutive_burst_ids = [burst1, BurstStub(*burst2._replace(burst_id=3))]
-        with pytest.raises(ValueError, match='All bursts must have consecutive burst IDs. Found:.*'):
+        with pytest.raises(ValueError, match='There can be no gaps in burst IDs accross a collection of bursts. Found:.*'):
             Swath.check_burst_group_validity(non_consecutive_burst_ids)  # type: ignore[arg-type]
 
     def test_get_swath_name(self, burst_infos):

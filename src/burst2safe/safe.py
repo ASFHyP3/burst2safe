@@ -8,6 +8,7 @@ from pathlib import Path
 from typing import List, Optional, Tuple, Union, cast
 
 import numpy as np
+from numpy.typing import NDArray
 from shapely.geometry import MultiPolygon, Polygon
 
 from burst2safe.base import create_content_unit, create_data_object, create_metadata_object
@@ -82,7 +83,7 @@ class Safe:
         return data_dir / f'support_{support_version}'
 
     @staticmethod
-    def count_components_and_holes(burst_swath_mask: np.array) -> None:
+    def count_components_and_holes(burst_swath_mask: NDArray[np.bool_]) -> None:
         """
         Performs a BFS search to count connected components and holes
 
@@ -161,7 +162,7 @@ class Safe:
             raise ValueError(msg)
 
     @staticmethod
-    def make_burst_swath_mask(burst_infos: Iterable[BurstInfo]) -> np.array:
+    def make_burst_swath_mask(burst_infos: Iterable[BurstInfo]) -> NDArray[np.bool_]:
         """
         Creates a mask of bursts/swaths included in a burst collection.
         Useful when using a BFS to identify invalid topologies in collections of bursts.
@@ -176,7 +177,7 @@ class Safe:
         # fail fast
         expected_burst_ids = list(range(min(burst_ids), max(burst_ids) + 1))
         if burst_ids != expected_burst_ids:
-            raise ValueError(f"There can be no gaps in burst IDs accross a collection of bursts. Burst IDs: {burst_ids}")
+            raise ValueError(f"There can be no gaps in burst IDs accross a collection of bursts. Found: {burst_ids}")
 
         burst_swath_mask = []
         for burst in burst_ids:
