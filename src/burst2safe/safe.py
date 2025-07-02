@@ -172,7 +172,9 @@ class Safe:
 
         Returns: np.array representing a truth table for included bursts
         """
-        burst_ids = sorted(list(set([info.burst_id for info in burst_infos])))
+        burst_ids = sorted([b for b in {info.burst_id for info in burst_infos} if b is not None])
+        if not burst_ids:
+            raise ValueError("No burst IDs found in any BurstInfo")
 
         # fail fast
         expected_burst_ids = list(range(min(burst_ids), max(burst_ids) + 1))
