@@ -84,7 +84,7 @@ def burst2stack(
         safe_paths.append(safe_path)
         if not keep_files:
             safe.cleanup()
-    print('SAFEs creaated!')
+    print('SAFEs created!')
 
     return safe_paths
 
