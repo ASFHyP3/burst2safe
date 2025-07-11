@@ -181,6 +181,36 @@ def test_vector_to_shapely_latlon_polygon(tmp_path):
         utils.vector_to_shapely_latlon_polygon(vector_file)
 
 
+def test_get_bbox():
+    extent = ['1.0', '0.0', '2.0', '2..0']
+    with pytest.raises(ValueError, match='.*multiple points'):
+         utils.get_bbox(extent)
+
+    extent = ['1.0', 'm', '2.0', '2.0']
+    with pytest.raises(ValueError, match='.*not a number'):
+         utils.get_bbox(extent)
+
+    extent = ['1.0', '0.0', '200.0', '2.0']
+    with pytest.raises(ValueError, match='.*not between -180 and 180'):
+         utils.get_bbox(extent)
+
+    extent = ['2.0', '0.0', '0.0', '1.0']
+    with pytest.raises(ValueError, match='.*larger than the east longitude'):
+         utils.get_bbox(extent)
+
+    extent = ['1.0', '0.0', '2.0', '200.0']
+    with pytest.raises(ValueError, match='.*not between -90 and 90'):
+         utils.get_bbox(extent)
+
+    extent = ['1.0', '2.0', '2.0', '0.0']
+    with pytest.raises(ValueError, match='.*larger than the north latitude'):
+         utils.get_bbox(extent)
+
+    extent = ['1.0', '0.0', '2.0', '1.0']
+    out_extent = utils.get_bbox(extent)
+    assert out_extent == box(1, 0, 2, 1)  # type: ignore[arg-type]
+
+
 def test_reparse_args_burst2safe():
     class MockArgs:
         def __init__(self, **kwargs):
