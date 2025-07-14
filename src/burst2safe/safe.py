@@ -1,5 +1,6 @@
 import bisect
 import shutil
+from collections import defaultdict
 from collections.abc import Iterable
 from datetime import datetime
 from itertools import product
@@ -117,9 +118,21 @@ class Safe:
             end_ids = [id_range[1] for id_range in burst_range[swath].values()]
             if len(set(end_ids)) != 1:
                 raise ValueError(f'Polarization groups in swath {swath} do not have same end burst id. Found {end_ids}')
-
+            
         if len(swaths) == 1:
             return
+
+        burst_id_dict = defaultdict(list)
+        _ = [burst_id_dict[num].append(int(swath[-1]))
+             for swath, info in burst_range.items()
+             for num in set(next(iter(info.values())))]
+
+        burst_id_dict = dict(burst_id_dict)
+        for id, swaths in burst_id_dict.items():
+            if max(swaths) + 1 - min(swaths) > len(swaths):
+                msg = ('No included burst can have gaps in swath coverage.\n'
+                       f'Found {id}: {[f"IW{num}" for num in swaths]}.')
+                raise ValueError(msg)
 
         swath_combos = [[swaths[i], swaths[i + 1]] for i in range(len(swaths) - 1)]
         working_pol = polarizations[0]
