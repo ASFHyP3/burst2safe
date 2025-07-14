@@ -29,15 +29,14 @@ classifiers=[
     "Natural Language :: English",
     "Operating System :: OS Independent",
     "Programming Language :: Python :: 3",
-    "Programming Language :: Python :: 3.9",
     "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: 3.12",
 ]
 dependencies = [
   "gdal",
-  "shapely>=2",
-  "numpy<2.1.0",
+  "shapely>=2.1",
+  "numpy",
   "lxml",
   "tifffile>=2022.04.22",
   "asf_search",
@@ -99,7 +98,7 @@ suppress-dummy-args = true
 "tests/*" = ["D1", "ANN"]
 
 [tool.mypy]
-python_version = "3.9"
+python_version = "3.10"
 warn_redundant_casts = true
 warn_unused_ignores = true
 warn_unreachable = true
