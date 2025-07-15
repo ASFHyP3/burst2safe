@@ -8,16 +8,15 @@ and uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [2.0.0]
 
+### Added
+* Added official support for Python 3.13.
+
 ### Changed
 * Removed `numpy<2.1.0` pin introduced in v1.1.1.
+* Upgraded aiohttp library to >=3.12.6, avoiding wrong requests in asynchronous tasks.
 
 ### Removed
-* Support for Python 3.9.
-
-## [1.4.6]
-
-### Changed
-* Upgraded aiohttp library to >=3.12.6, avoiding wrong requests in asynchronous tasks.
+* Removed support for Python 3.9.
 
 ### Fixed
 * Removed `warnings.filterwarnings('ignore')` and replacing it by disabling the `asf_search` logger. Fixes https://github.com/ASFHyP3/burst2safe/issues/160
