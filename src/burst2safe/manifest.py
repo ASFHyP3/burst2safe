@@ -1,7 +1,6 @@
 import hashlib
 from copy import deepcopy
 from pathlib import Path
-from typing import List, Optional, Union
 
 import lxml.etree as ET
 import numpy as np
@@ -49,9 +48,9 @@ class Manifest:
 
     def __init__(
         self,
-        content_units: List[ET._Element],
-        metadata_objects: List[ET._Element],
-        data_objects: List[ET._Element],
+        content_units: list[ET._Element],
+        metadata_objects: list[ET._Element],
+        data_objects: list[ET._Element],
         bbox: Polygon,
         template_manifest: ET._Element,
     ):
@@ -72,12 +71,12 @@ class Manifest:
         self.version = 'esa/safe/sentinel-1.0/sentinel-1/sar/level-1/slc/standard/iwdp'
 
         # Updated by methods
-        self.information_package_map: Optional[ET._Element] = None
-        self.metadata_section: Optional[ET._Element] = None
-        self.data_object_section: Optional[ET._Element] = None
-        self.xml: Union[ET._Element, ET._ElementTree, None] = None
-        self.path: Optional[Path] = None
-        self.crc: Optional[str] = None
+        self.information_package_map: ET._Element | None = None
+        self.metadata_section: ET._Element | None = None
+        self.data_object_section: ET._Element | None = None
+        self.xml: ET._Element | ET._ElementTree | None = None
+        self.path: Path | None = None
+        self.crc: str | None = None
 
     def create_information_package_map(self):
         """Create the information package map."""
@@ -141,7 +140,7 @@ class Manifest:
         self.create_metadata_section()
         self.create_data_object_section()
 
-        manifest = ET.Element('{%s}XFDU' % NAMESPACES['xfdu'], nsmap=NAMESPACES)
+        manifest = ET.Element('{%s}XFDU' % NAMESPACES['xfdu'], nsmap=NAMESPACES)  # noqa: UP031
         manifest.set('version', self.version)
         assert self.information_package_map is not None
         assert self.metadata_section is not None
@@ -178,7 +177,7 @@ class Kml:
             bbox: The bounding box of the product
         """
         self.bbox = bbox
-        self.xml: Union[ET._Element, ET._ElementTree, None] = None
+        self.xml: ET._Element | ET._ElementTree | None = None
 
     def assemble(self):
         """Assemble the components of the SAFE KML preview file."""
@@ -239,10 +238,10 @@ class Preview:
     def __init__(
         self,
         name: str,
-        product: List[str],
-        calibration: List[str],
-        measurement: List[str],
-        rfi: List[str] = [],
+        product: list[str],
+        calibration: list[str],
+        measurement: list[str],
+        rfi: list[str] = [],
     ):
         """Initialize a Preview object.
 
@@ -272,8 +271,8 @@ class Preview:
         ]
         if len(self.rfi) > 0:
             self.support.append('s1-level-1-rfi.xsd')
-        self.html: Optional[ET._ElementTree] = None
-        self.path: Optional[Path] = None
+        self.html: ET._ElementTree | None = None
+        self.path: Path | None = None
 
     def create_base(self):
         """Create the base HTML product preview."""

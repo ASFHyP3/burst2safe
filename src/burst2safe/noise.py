@@ -1,6 +1,5 @@
 # mypy: disable-error-code="union-attr"
 from copy import deepcopy
-from typing import Optional
 
 import lxml.etree as ET
 import numpy as np
@@ -21,9 +20,9 @@ class Noise(Annotation):
             image_number: Image number.
         """
         super().__init__(burst_infos, 'noise', ipf_version, image_number)
-        self.noise_vector_list: Optional[ET._Element] = None  # Only used in version < 2.90
-        self.range_vector_list: Optional[ET._Element] = None
-        self.azimuth_vector_list: Optional[ET._Element] = None
+        self.noise_vector_list: ET._Element | None = None  # Only used in version < 2.90
+        self.range_vector_list: ET._Element | None = None
+        self.azimuth_vector_list: ET._Element | None = None
 
     def create_range_vector_list(self):
         """Create the range vector list."""

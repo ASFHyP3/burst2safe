@@ -3,7 +3,7 @@ import hashlib
 from copy import deepcopy
 from datetime import datetime, timedelta
 from pathlib import Path
-from typing import List, Optional, Union, cast
+from typing import cast
 
 import lxml.etree as ET
 
@@ -14,9 +14,7 @@ SCHEMA = '{urn:ccsds:schema:xfdu:1}'
 
 
 class ListOfListElements:
-    def __init__(
-        self, inputs: List[ET._Element], start_line: Optional[int] = None, slc_lengths: Optional[List[int]] = None
-    ):
+    def __init__(self, inputs: list[ET._Element], start_line: int | None = None, slc_lengths: list[int] | None = None):
         """Initialize the ListOfListElements object.
 
         Args:
@@ -25,8 +23,8 @@ class ListOfListElements:
             slc_lengths: The total line lengths of the SLCs corresponding to each element.
         """
         self.inputs: list[ET._Element] = inputs
-        self.start_line: Optional[int] = start_line
-        self.slc_lengths: Optional[list[int]] = slc_lengths
+        self.start_line: int | None = start_line
+        self.slc_lengths: list[int] | None = slc_lengths
 
         self.name = self.inputs[0].tag
         elements = flatten([element.findall('*') for element in self.inputs])
@@ -64,7 +62,7 @@ class ListOfListElements:
         first_time = min([datetime.fromisoformat(sub.find(self.time_field).text) for sub in element])  # type: ignore[arg-type]
         return first_time
 
-    def get_unique_elements(self) -> List[ET._Element]:
+    def get_unique_elements(self) -> list[ET._Element]:
         """Get the elements without duplicates. Adjust line number if present.
 
         Returns:
@@ -96,7 +94,7 @@ class ListOfListElements:
         return uniques
 
     @staticmethod
-    def filter_by_line(element_list: List[ET._Element], line_bounds: tuple[float, float]) -> List[ET._Element]:
+    def filter_by_line(element_list: list[ET._Element], line_bounds: tuple[float, float]) -> list[ET._Element]:
         """Filter elements by line number.
 
         Args:
@@ -111,7 +109,7 @@ class ListOfListElements:
                 new_list.append(deepcopy(elem))
         return new_list
 
-    def update_line_numbers(self, elements: List[ET._Element]) -> None:
+    def update_line_numbers(self, elements: list[ET._Element]) -> None:
         """Update the line numbers of the elements.
 
         Args:
@@ -123,8 +121,8 @@ class ListOfListElements:
             element.find('line').text = str(standard_line - self.start_line)
 
     def filter_by_time(
-        self, elements: List[ET._Element], anx_bounds: tuple[datetime, datetime], buffer: timedelta
-    ) -> List[ET._Element]:
+        self, elements: list[ET._Element], anx_bounds: tuple[datetime, datetime], buffer: timedelta
+    ) -> list[ET._Element]:
         """Filter elements by time.
 
         Args:
@@ -149,7 +147,7 @@ class ListOfListElements:
         self,
         anx_bounds: tuple[datetime, datetime],
         buffer: timedelta = timedelta(seconds=3),
-        line_bounds: Optional[tuple[float, float]] = None,
+        line_bounds: tuple[float, float] | None = None,
     ) -> ET._Element:
         """Filter elements by time/line. Adjust line number if present.
 
@@ -215,7 +213,7 @@ def create_metadata_object(simple_name: str) -> ET._Element:
 
 
 def create_data_object(
-    simple_name: str, relative_path: Union[Path, str], rep_id: str, mime_type: str, size_bytes: int, md5: str
+    simple_name: str, relative_path: Path | str, rep_id: str, mime_type: str, size_bytes: int, md5: str
 ) -> ET._Element:
     """Create a data object element for a manifest.safe file.
 
@@ -281,12 +279,12 @@ class Annotation:
         self.slc_lengths = slc_lengths
 
         # annotation components to be extended by subclasses
-        self.ads_header: Optional[ET._Element] = None
-        self.xml: Union[ET._Element, ET._ElementTree, None] = None
+        self.ads_header: ET._Element | None = None
+        self.xml: ET._Element | ET._ElementTree | None = None
 
         # these attributes are updated when the annotation is written to a file
-        self.size_bytes: Optional[int] = None
-        self.md5: Optional[str] = None
+        self.size_bytes: int | None = None
+        self.md5: str | None = None
 
     def create_ads_header(self):
         """Create the ADS header for the annotation."""
@@ -296,7 +294,7 @@ class Annotation:
         ads_header.find('imageNumber').text = f'{self.image_number:03d}'
         self.ads_header = ads_header
 
-    def merge_lists(self, list_name: str, line_bounds: Optional[tuple[int, int]] = None) -> ET._Element:
+    def merge_lists(self, list_name: str, line_bounds: tuple[int, int] | None = None) -> ET._Element:
         """Merge lists of elements into a single list.
 
         Args:
