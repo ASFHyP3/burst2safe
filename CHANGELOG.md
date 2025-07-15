@@ -14,6 +14,7 @@ and uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 ### Changed
 * Removed `numpy<2.1.0` pin introduced in v1.1.1.
 * Upgraded aiohttp library to >=3.12.6, avoiding wrong requests in asynchronous tasks.
+* Enable [`pyupgrade (UP)`](https://docs.astral.sh/ruff/rules/#pyupgrade-up) for ruff and fix the resulting warnings.
 
 ### Removed
 * Removed support for Python 3.9.
