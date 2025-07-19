@@ -36,7 +36,7 @@ class Product(Annotation):
         """
         super().__init__(burst_infos, 'product', ipf_version, image_number)
         self.dummy = dummy
-        self.quality_information = None
+        self.quality_information: Optional[ET._Element] = None
         self.general_annotation: Optional[ET._Element] = None
         self.image_annotation: Optional[ET._Element] = None
         self.doppler_centroid: Optional[ET._Element] = None
