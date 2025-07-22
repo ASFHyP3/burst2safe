@@ -1,7 +1,7 @@
 import asyncio
 import os
+from collections.abc import Iterable
 from pathlib import Path
-from typing import Iterable
 
 import aiohttp
 from tenacity import retry, retry_if_result, stop_after_attempt, stop_after_delay, wait_random

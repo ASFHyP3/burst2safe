@@ -13,7 +13,7 @@ where = ["src"]
 
 [project]
 name = "burst2safe"
-requires-python = ">=3.9"
+requires-python = ">=3.10"
 dynamic = ["version"]
 authors = [
     {name="Forrest Williams", email="ffwilliams2@alaska.edu"},
@@ -32,6 +32,7 @@ classifiers=[
     "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
 ]
 dependencies = [
   "gdal",
@@ -77,8 +78,8 @@ quote-style = "single"
 [tool.ruff.lint]
 extend-select = [
     "I",   # isort: https://docs.astral.sh/ruff/rules/#isort-i
+    "UP",  # pyupgrade: https://docs.astral.sh/ruff/rules/#pyupgrade-up
     # TODO: Uncomment the following extensions and address their warnings:
-    # "UP",  # pyupgrade: https://docs.astral.sh/ruff/rules/#pyupgrade-up
     # "D",   # pydocstyle: https://docs.astral.sh/ruff/rules/#pydocstyle-d
     # "ANN", # annotations: https://docs.astral.sh/ruff/rules/#flake8-annotations-ann
     # "PTH", # use-pathlib-pth: https://docs.astral.sh/ruff/rules/#flake8-use-pathlib-pth

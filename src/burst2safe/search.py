@@ -2,7 +2,6 @@ import logging
 from collections.abc import Iterable
 from datetime import datetime
 from itertools import product
-from typing import List, Optional, Tuple
 
 import asf_search
 import numpy as np
@@ -14,7 +13,7 @@ asf_logger = logging.getLogger(asf_search.__name__)
 asf_logger.disabled = True
 
 
-def find_granules(granules: Iterable[str]) -> List[S1BurstProduct]:
+def find_granules(granules: Iterable[str]) -> list[S1BurstProduct]:
     """Find granules by name using ASF Search.
 
     Args:
@@ -32,7 +31,7 @@ def find_granules(granules: Iterable[str]) -> List[S1BurstProduct]:
     return list(results)
 
 
-def add_surrounding_bursts(bursts: List[S1BurstProduct], min_bursts: int) -> List[S1BurstProduct]:
+def add_surrounding_bursts(bursts: list[S1BurstProduct], min_bursts: int) -> list[S1BurstProduct]:
     """Add bursts to the list to ensure each swath has at least `min_bursts` bursts.
     All bursts must be from the same absolute orbit, swath, and polarization.
 
@@ -66,12 +65,12 @@ def add_surrounding_bursts(bursts: List[S1BurstProduct], min_bursts: int) -> Lis
 
 
 def get_burst_group(
-    search_results: List[S1BurstProduct],
+    search_results: list[S1BurstProduct],
     pol: str,
-    swath: Optional[str] = None,
-    orbit: Optional[int] = None,
+    swath: str | None = None,
+    orbit: int | None = None,
     min_bursts: int = 0,
-) -> List[S1BurstProduct]:
+) -> list[S1BurstProduct]:
     """Find a group of bursts with the same polarization, swath and optionally orbit.
     Add surrounding bursts if the group is too small.
 
@@ -109,8 +108,8 @@ def get_burst_group(
 
 
 def sanitize_group_search_inputs(
-    polarizations: Optional[list] = None, swaths: Optional[list] = None, mode: str = 'IW'
-) -> Tuple[list[str], list[str]]:
+    polarizations: list | None = None, swaths: list | None = None, mode: str = 'IW'
+) -> tuple[list[str], list[str]]:
     """Sanitize inputs for group search.
 
     Args:
@@ -145,12 +144,12 @@ def sanitize_group_search_inputs(
 
 
 def add_missing_bursts(
-    search_results: List[S1BurstProduct],
-    polarizations: List[str],
-    swaths: List[str],
+    search_results: list[S1BurstProduct],
+    polarizations: list[str],
+    swaths: list[str],
     min_bursts: int,
     use_relative_orbit: bool,
-) -> List[S1BurstProduct]:
+) -> list[S1BurstProduct]:
     """Add missing bursts to the search results to ensure each swath/pol combo has at least `min_bursts` bursts.
 
     Args:
@@ -179,16 +178,16 @@ def add_missing_bursts(
 
 
 def find_group(
-    orbit: Optional[int],
+    orbit: int | None,
     footprint: Polygon,
-    polarizations: Optional[list[str]] = None,
-    swaths: Optional[list[str]] = None,
+    polarizations: list[str] | None = None,
+    swaths: list[str] | None = None,
     mode: str = 'IW',
     min_bursts: int = 1,
-    start_date: Optional[datetime] = None,
-    end_date: Optional[datetime] = None,
+    start_date: datetime | None = None,
+    end_date: datetime | None = None,
     use_relative_orbit: bool = False,
-) -> List[S1BurstProduct]:
+) -> list[S1BurstProduct]:
     """Find burst groups using ASF Search.
 
     Args:
@@ -225,11 +224,11 @@ def find_group(
 
 
 def find_bursts(
-    granules: Optional[Iterable[str]] = None,
-    orbit: Optional[int] = None,
-    footprint: Optional[Polygon] = None,
-    polarizations: Optional[list[str]] = None,
-    swaths: Optional[list[str]] = None,
+    granules: Iterable[str] | None = None,
+    orbit: int | None = None,
+    footprint: Polygon | None = None,
+    polarizations: list[str] | None = None,
+    swaths: list[str] | None = None,
     mode: str = 'IW',
     min_bursts: int = 1,
 ) -> list[S1BurstProduct]:

@@ -4,7 +4,7 @@ from collections.abc import Iterable
 from datetime import datetime
 from itertools import product
 from pathlib import Path
-from typing import List, Optional, Tuple, Union, cast
+from typing import cast
 
 import numpy as np
 from shapely.geometry import MultiPolygon, Polygon
@@ -19,9 +19,7 @@ from burst2safe.utils import BurstInfo, drop_duplicates, flatten, get_subxml_fro
 class Safe:
     """Class representing a SAFE file."""
 
-    def __init__(
-        self, burst_infos: list[BurstInfo], all_anns: bool = False, work_dir: Optional[Union[Path, str]] = None
-    ):
+    def __init__(self, burst_infos: list[BurstInfo], all_anns: bool = False, work_dir: Path | str | None = None):
         """Initialize a Safe object.
 
         Args:
@@ -40,8 +38,8 @@ class Safe:
         self.safe_path = self.work_dir / self.name
         self.swaths: list = []
         self.blank_products: list = []
-        self.manifest: Optional[Manifest] = None
-        self.kml: Optional[Kml] = None
+        self.manifest: Manifest | None = None
+        self.kml: Kml | None = None
 
         self.version = self.get_ipf_version(self.burst_infos[0].metadata_path)
         self.major_version, self.minor_version = [int(x) for x in self.version.split('.')]
@@ -230,7 +228,7 @@ class Safe:
         shutil.copy(self.support_dir.parent / 'logo.png', icon_dir / 'logo.png')
 
     @staticmethod
-    def create_representative_burst_set(template_bursts: Iterable[BurstInfo], swath: str, pol: str) -> List[BurstInfo]:
+    def create_representative_burst_set(template_bursts: Iterable[BurstInfo], swath: str, pol: str) -> list[BurstInfo]:
         """Create a representative burst set for a blank product.
 
         Args:
@@ -267,7 +265,7 @@ class Safe:
             representative_bursts.append(new_burst)
         return representative_bursts
 
-    def create_blank_products(self, image_number: int) -> List[Product]:
+    def create_blank_products(self, image_number: int) -> list[Product]:
         """Create blank product annotation for missing swaths.
 
         Args:
@@ -359,7 +357,7 @@ class Safe:
 
         return content_units, metadata_objects, data_objects
 
-    def compile_manifest_components(self) -> Tuple[List, List, List]:
+    def compile_manifest_components(self) -> tuple[list, list, list]:
         """Compile the manifest components for all files within the SAFE file.
 
         Returns:
