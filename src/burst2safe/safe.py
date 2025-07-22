@@ -129,10 +129,10 @@ class Safe:
             for num in set(next(iter(info.values()))):
                 burst_id_dict[num].append(int(swath[-1]))
 
-        for id, swaths in burst_id_dict.items():
-            if max(swaths) + 1 - min(swaths) > len(swaths):
+        for id, burst_swaths in burst_id_dict.items():
+            if max(burst_swaths) + 1 - min(burst_swaths) > len(burst_swaths):
                 msg = (
-                    f'No included burst can have gaps in swath coverage.\nFound {id}: {[f"IW{num}" for num in swaths]}.'
+                    f'No included burst can have gaps in swath coverage.\nFound {id}: {[f"IW{n}" for n in burst_swaths]}.'
                 )
                 raise ValueError(msg)
 
