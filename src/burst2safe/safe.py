@@ -131,9 +131,7 @@ class Safe:
 
         for id, burst_swaths in burst_id_dict.items():
             if max(burst_swaths) + 1 - min(burst_swaths) > len(burst_swaths):
-                msg = (
-                    f'No included burst can have gaps in swath coverage.\nFound {id}: {[f"IW{n}" for n in burst_swaths]}.'
-                )
+                msg = f'No included burst can have gaps in swath coverage.\nFound {id}: {[f"IW{n}" for n in burst_swaths]}.'
                 raise ValueError(msg)
 
     def get_name(self, unique_id: str = '0000') -> str:
