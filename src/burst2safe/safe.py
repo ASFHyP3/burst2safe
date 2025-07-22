@@ -124,7 +124,7 @@ class Safe:
             return
 
         # Confirms that there are no gaps in swath coverage for each burst
-        burst_id_dict: dict[str, list[int]] = defaultdict(list)
+        burst_id_dict: dict[int, list[int]] = defaultdict(list)
         for swath, info in burst_range.items():
             for num in set(next(iter(info.values()))):
                 burst_id_dict[num].append(int(swath[-1]))
