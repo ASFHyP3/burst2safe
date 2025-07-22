@@ -7,7 +7,6 @@ from itertools import product
 from pathlib import Path
 from typing import List, Optional, Tuple, Union, cast
 
-import numpy as np
 from shapely.geometry import MultiPolygon, Polygon
 
 from burst2safe.base import create_content_unit, create_data_object, create_metadata_object
@@ -125,14 +124,11 @@ class Safe:
             return
 
         # Confirms that there are no gaps in swath coverage for each burst
-        burst_id_dict = defaultdict(list)
-        _ = [
-            burst_id_dict[num].append(int(swath[-1]))
-            for swath, info in burst_range.items()
-            for num in set(next(iter(info.values())))
-        ]
+        burst_id_dict: dict[str, list[int]] = defaultdict(list)
+        for swath, info in burst_range.items():
+            for num in set(next(iter(info.values()))):
+                burst_id_dict[num].append(int(swath[-1]))
 
-        burst_id_dict = dict(burst_id_dict)
         for id, swaths in burst_id_dict.items():
             if max(swaths) + 1 - min(swaths) > len(swaths):
                 msg = (
