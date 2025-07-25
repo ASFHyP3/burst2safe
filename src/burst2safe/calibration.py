@@ -1,5 +1,4 @@
 from copy import deepcopy
-from typing import Optional
 
 import lxml.etree as ET
 
@@ -19,7 +18,7 @@ class Calibration(Annotation):
             image_number: Image number.
         """
         super().__init__(burst_infos, 'calibration', ipf_version, image_number)
-        self.calibration_information: Optional[ET._Element] = None
+        self.calibration_information: ET._Element | None = None
         self.calibrattion_vector_list = None
 
     def create_calibration_information(self):

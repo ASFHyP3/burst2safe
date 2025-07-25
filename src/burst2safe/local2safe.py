@@ -5,7 +5,7 @@ import argparse
 import json
 from datetime import datetime
 from pathlib import Path
-from typing import Optional, Union, cast
+from typing import cast
 
 from burst2safe import utils
 from burst2safe.burst_id import calculate_burstid
@@ -113,7 +113,7 @@ def local2safe(
     slc_dict: dict,
     all_anns: bool = False,
     keep_files: bool = False,
-    work_dir: Optional[Union[Path, str]] = None,
+    work_dir: Path | str | None = None,
 ) -> Path:
     """Convert a set of burst granules to the ESA SAFE format using local files
 

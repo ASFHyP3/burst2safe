@@ -3,7 +3,6 @@
 from argparse import ArgumentParser
 from collections.abc import Iterable
 from pathlib import Path
-from typing import Optional
 
 from shapely.geometry import Polygon
 
@@ -20,16 +19,16 @@ providing the absolute orbit number, extent, and polarizations arguments.
 
 
 def burst2safe(
-    granules: Optional[Iterable[str]] = None,
-    orbit: Optional[int] = None,
-    extent: Optional[Polygon] = None,
-    polarizations: Optional[list[str]] = None,
-    swaths: Optional[list[str]] = None,
+    granules: Iterable[str] | None = None,
+    orbit: int | None = None,
+    extent: Polygon | None = None,
+    polarizations: list[str] | None = None,
+    swaths: list[str] | None = None,
     mode: str = 'IW',
     min_bursts: int = 1,
     all_anns: bool = False,
     keep_files: bool = False,
-    work_dir: Optional[Path] = None,
+    work_dir: Path | None = None,
 ) -> Path:
     """Convert a set of burst granules to the ESA SAFE format.
 

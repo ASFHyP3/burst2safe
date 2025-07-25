@@ -7,7 +7,6 @@ from collections.abc import Iterable
 from dataclasses import dataclass
 from datetime import datetime, timedelta
 from pathlib import Path
-from typing import Dict, List, Optional, Union
 
 import lxml.etree as ET
 from asf_search.Products.S1BurstProduct import S1BurstProduct
@@ -24,24 +23,24 @@ asf_logger.disabled = True
 class BurstInfo:
     """Dataclass for storing burst information."""
 
-    granule: Optional[str]
-    slc_granule: Optional[str]
+    granule: str | None
+    slc_granule: str | None
     swath: str
     polarization: str
-    burst_id: Optional[int]
+    burst_id: int | None
     burst_index: int
     direction: str
     absolute_orbit: int
     relative_orbit: int
-    date: Optional[datetime]
-    data_url: Optional[str]
-    data_path: Optional[Path]
-    metadata_url: Optional[str]
+    date: datetime | None
+    data_url: str | None
+    data_path: Path | None
+    metadata_url: str | None
     metadata_path: Path
-    start_utc: Optional[datetime] = None
-    stop_utc: Optional[datetime] = None
-    length: Optional[int] = None
-    width: Optional[int] = None
+    start_utc: datetime | None = None
+    stop_utc: datetime | None = None
+    length: int | None = None
+    width: int | None = None
 
     def add_shape_info(self):
         """Add shape information to the BurstInfo object."""
@@ -109,7 +108,7 @@ def create_burst_info(product: S1BurstProduct, work_dir: Path) -> BurstInfo:
     return burst_info
 
 
-def get_burst_infos(products: Iterable[S1BurstProduct], work_dir: Optional[Path]) -> List[BurstInfo]:
+def get_burst_infos(products: Iterable[S1BurstProduct], work_dir: Path | None) -> list[BurstInfo]:
     """Get burst information from ASF Search.
 
     Args:
@@ -128,7 +127,7 @@ def get_burst_infos(products: Iterable[S1BurstProduct], work_dir: Optional[Path]
     return burst_info_list
 
 
-def sort_burst_infos(burst_info_list: List[BurstInfo]) -> Dict:
+def sort_burst_infos(burst_info_list: list[BurstInfo]) -> dict:
     """Sort BurstInfo objects by swath and polarization.
 
     Args:
@@ -155,7 +154,7 @@ def sort_burst_infos(burst_info_list: List[BurstInfo]) -> Dict:
     return burst_infos
 
 
-def optional_wd(wd: Optional[Union[Path, str]] = None) -> Path:
+def optional_wd(wd: Path | str | None = None) -> Path:
     """Return the working directory as a Path object
 
     Args:
@@ -184,8 +183,8 @@ def calculate_crc16(file_path: Path) -> str:
 
 
 def get_subxml_from_metadata(
-    metadata_path: Path, xml_type: str, subswath: Optional[str] = None, polarization: Optional[str] = None
-) -> Optional[ET._Element]:
+    metadata_path: Path, xml_type: str, subswath: str | None = None, polarization: str | None = None
+) -> ET._Element | None:
     """Extract child xml info from ASF combined metadata file.
 
     Args:
@@ -223,17 +222,17 @@ def get_subxml_from_metadata(
     return desired_metadata
 
 
-def flatten(list_of_lists: List[List]) -> List:
+def flatten(list_of_lists: list[list]) -> list:
     """Flatten a list of lists."""
     return [item for sublist in list_of_lists for item in sublist]
 
 
-def drop_duplicates(input_list: List) -> List:
+def drop_duplicates(input_list: list) -> list:
     """Drop duplicates from a list, while preserving order."""
     return list(dict.fromkeys(input_list))
 
 
-def set_text(element: ET._Element, text: Union[str, int]) -> None:
+def set_text(element: ET._Element, text: str | int) -> None:
     """Set the text of an element if it is not None.
 
     Args:
@@ -274,6 +273,31 @@ def vector_to_shapely_latlon_polygon(vector_file_path):
     dataset = None
 
     return polygon
+
+
+def get_bbox(extent):
+    """Returns the extent if it meets the requirements
+
+    Args:
+        extent: lat/lon list in the format (W S E N)
+
+    Returns:
+        Bounding box
+    """
+    if not all(item.count('.') <= 1 and item.count('-') <= 1 for item in extent):
+        raise ValueError('One item in the extent has multiple points')
+    elif not all(item.replace('.', '').replace('-', '').isdigit() for item in extent):
+        raise ValueError('One item in the extent is not a number')
+    elif not (abs(float(extent[0])) <= 180 and abs(float(extent[2])) <= 180):
+        raise ValueError('The longitudes are not between -180 and 180')
+    elif float(extent[0]) >= float(extent[2]):
+        raise ValueError('The west longitude is larger than the east longitude')
+    elif not (abs(float(extent[1])) <= 90 and abs(float(extent[3])) <= 90):
+        raise ValueError('The latitudes are not between -90 and 90')
+    elif float(extent[1]) >= float(extent[3]):
+        raise ValueError('The south latitude is larger than the north latitude')
+    else:
+        return box(*[float(x) for x in extent])  # type: ignore[arg-type]
 
 
 def reparse_args(args: Namespace, tool: str) -> Namespace:
@@ -319,12 +343,12 @@ def reparse_args(args: Namespace, tool: str) -> Namespace:
             args.swaths = [swath.upper() for swath in args.swaths]
 
         if args.extent:
-            if not (len(args.extent) == 4 or len(args.extent) == 1):
+            if len(args.extent) == 1:
+                args.extent = vector_to_shapely_latlon_polygon(args.extent[0])
+            elif len(args.extent) == 4:
+                args.extent = get_bbox(args.extent)
+            else:
                 raise ValueError(
                     'The argument provided to --extent could not be interpreted as a bounding box (W S E N in lat/lon) or a geometry file.'
                 )
-            elif len(args.extent) == 4:
-                args.extent = box(*[float(x) for x in args.extent])  # type: ignore[arg-type]
-            else:
-                args.extent = vector_to_shapely_latlon_polygon(args.extent[0])
     return args

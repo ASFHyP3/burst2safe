@@ -1,6 +1,5 @@
 import warnings
 from copy import deepcopy
-from typing import Optional
 
 import lxml.etree as ET
 
@@ -23,9 +22,9 @@ class Rfi(Annotation):
             image_number: Image number.
         """
         super().__init__(burst_infos, 'rfi', ipf_version, image_number)
-        self.rfi_mitigation_applied: Optional[ET._Element] = None
-        self.rfi_detection_from_noise_report_list: Optional[ET._Element] = None
-        self.rfi_burst_report_list: Optional[ET._Element] = None
+        self.rfi_mitigation_applied: ET._Element | None = None
+        self.rfi_detection_from_noise_report_list: ET._Element | None = None
+        self.rfi_burst_report_list: ET._Element | None = None
 
     def create_rfi_mitigation_applied(self):
         """Create the rifMitigationApplied element."""
