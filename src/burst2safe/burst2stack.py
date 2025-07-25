@@ -3,7 +3,6 @@
 from argparse import ArgumentParser
 from datetime import datetime
 from pathlib import Path
-from typing import List, Optional
 
 from shapely.geometry import Polygon
 
@@ -22,17 +21,17 @@ an extent, and polarization(s).
 
 def burst2stack(
     extent: Polygon,
-    rel_orbit: Optional[int] = None,
-    start_date: Optional[datetime] = None,
-    end_date: Optional[datetime] = None,
-    polarizations: Optional[list[str]] = None,
-    swaths: Optional[list[str]] = None,
+    rel_orbit: int | None = None,
+    start_date: datetime | None = None,
+    end_date: datetime | None = None,
+    polarizations: list[str] | None = None,
+    swaths: list[str] | None = None,
     mode: str = 'IW',
     min_bursts: int = 1,
     all_anns: bool = False,
     keep_files: bool = False,
-    work_dir: Optional[Path] = None,
-) -> List[Path]:
+    work_dir: Path | None = None,
+) -> list[Path]:
     """Convert a stack of burst granules to a stack of ESA SAFEs.
     Wraps the burst2safe function to handle multiple dates.
 
@@ -84,7 +83,7 @@ def burst2stack(
         safe_paths.append(safe_path)
         if not keep_files:
             safe.cleanup()
-    print('SAFEs creaated!')
+    print('SAFEs created!')
 
     return safe_paths
 

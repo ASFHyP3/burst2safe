@@ -6,6 +6,25 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [PEP 440](https://www.python.org/dev/peps/pep-0440/)
 and uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.0.0]
+
+### Added
+* Added official support for Python 3.13.
+
+### Changed
+* Removed `numpy<2.1.0` pin introduced in v1.1.1.
+* Upgraded aiohttp library to >=3.12.6, avoiding wrong requests in asynchronous tasks.
+* Enable [`pyupgrade (UP)`](https://docs.astral.sh/ruff/rules/#pyupgrade-up) for ruff and fix the resulting warnings.
+
+### Removed
+* Removed support for Python 3.9.
+
+### Fixed
+* Removed `warnings.filterwarnings('ignore')` and replacing it by disabling the `asf_search` logger. Fixes https://github.com/ASFHyP3/burst2safe/issues/160
+* Avoid catching ValueError exception twice when handling the `--extent` option. Fixes https://github.com/ASFHyP3/burst2safe/issues/129
+* Allow burst without RFI detection from noise report. Fixes https://github.com/ASFHyP3/burst2safe/issues/133
+* Fix typo by renaming `burst2safe.product.Product.qulatity_information` to `burst2safe.product.Product.quality_information`.
+
 ## [1.4.5]
 
 ### Fixed

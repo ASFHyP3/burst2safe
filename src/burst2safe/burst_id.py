@@ -204,6 +204,6 @@ def calculate_burstid(
         esa_burst_id = _calc_esa_burstid(time_since_anx, orbit_number_start, pream, beamtime)
 
     else:
-        raise InvalidModeNameError('Invalid mode name: %s' % mode)
+        raise InvalidModeNameError(f'Invalid mode name: {mode}')
 
     return esa_burst_id, orbit_number

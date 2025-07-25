@@ -3,7 +3,7 @@ from collections.abc import Iterable
 from copy import deepcopy
 from dataclasses import dataclass
 from datetime import timedelta
-from typing import Optional, cast
+from typing import cast
 
 import lxml.etree as ET
 import numpy as np
@@ -36,15 +36,15 @@ class Product(Annotation):
         """
         super().__init__(burst_infos, 'product', ipf_version, image_number)
         self.dummy = dummy
-        self.qulatity_information = None
-        self.general_annotation: Optional[ET._Element] = None
-        self.image_annotation: Optional[ET._Element] = None
-        self.doppler_centroid: Optional[ET._Element] = None
-        self.antenna_pattern: Optional[ET._Element] = None
-        self.swath_timing: Optional[ET._Element] = None
-        self.geolocation_grid: Optional[ET._Element] = None
-        self.coordinate_conversion: Optional[ET._Element] = None
-        self.swath_merging: Optional[ET._Element] = None
+        self.quality_information: ET._Element | None = None
+        self.general_annotation: ET._Element | None = None
+        self.image_annotation: ET._Element | None = None
+        self.doppler_centroid: ET._Element | None = None
+        self.antenna_pattern: ET._Element | None = None
+        self.swath_timing: ET._Element | None = None
+        self.geolocation_grid: ET._Element | None = None
+        self.coordinate_conversion: ET._Element | None = None
+        self.swath_merging: ET._Element | None = None
         self.gcps: list = []
 
     def create_quality_information(self):

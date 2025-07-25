@@ -13,7 +13,7 @@ where = ["src"]
 
 [project]
 name = "burst2safe"
-requires-python = ">=3.9"
+requires-python = ">=3.10"
 dynamic = ["version"]
 authors = [
     {name="Forrest Williams", email="ffwilliams2@alaska.edu"},
@@ -29,20 +29,20 @@ classifiers=[
     "Natural Language :: English",
     "Operating System :: OS Independent",
     "Programming Language :: Python :: 3",
-    "Programming Language :: Python :: 3.9",
     "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
 ]
 dependencies = [
   "gdal",
-  "shapely>=2",
-  "numpy<2.1.0",
+  "shapely>=2.1.0",
+  "numpy",
   "lxml",
   "tifffile>=2022.04.22",
   "asf_search",
   "dateparser!=1.1.0",
-  "aiohttp",
+  "aiohttp>=3.12.6",
 ]
 
 [project.urls]
@@ -78,8 +78,8 @@ quote-style = "single"
 [tool.ruff.lint]
 extend-select = [
     "I",   # isort: https://docs.astral.sh/ruff/rules/#isort-i
+    "UP",  # pyupgrade: https://docs.astral.sh/ruff/rules/#pyupgrade-up
     # TODO: Uncomment the following extensions and address their warnings:
-    # "UP",  # pyupgrade: https://docs.astral.sh/ruff/rules/#pyupgrade-up
     # "D",   # pydocstyle: https://docs.astral.sh/ruff/rules/#pydocstyle-d
     # "ANN", # annotations: https://docs.astral.sh/ruff/rules/#flake8-annotations-ann
     # "PTH", # use-pathlib-pth: https://docs.astral.sh/ruff/rules/#flake8-use-pathlib-pth
@@ -99,7 +99,7 @@ suppress-dummy-args = true
 "tests/*" = ["D1", "ANN"]
 
 [tool.mypy]
-python_version = "3.9"
+python_version = "3.10"
 warn_redundant_casts = true
 warn_unused_ignores = true
 warn_unreachable = true

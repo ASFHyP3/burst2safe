@@ -1,7 +1,7 @@
 import hashlib
 from datetime import datetime
 from pathlib import Path
-from typing import Optional, Tuple, cast
+from typing import cast
 
 import numpy as np
 from osgeo import gdal, osr
@@ -51,10 +51,10 @@ class Measurement:
         # TODO: sometimes bursts from different SLCs have different widths. Is this an issue?
         self.total_width = max(cast(int, info.width) for info in burst_infos)
 
-        self.data_mean: Optional[complex] = None
-        self.data_std: Optional[complex] = None
-        self.size_bytes: Optional[int] = None
-        self.md5: Optional[str] = None
+        self.data_mean: complex | None = None
+        self.data_std: complex | None = None
+        self.size_bytes: int | None = None
+        self.md5: str | None = None
         self.byte_offsets: list = []
 
     def get_data(self, band: int = 1) -> np.ndarray:
@@ -142,7 +142,7 @@ class Measurement:
                 self.size_bytes = len(file_bytes)
                 self.md5 = hashlib.md5(file_bytes).hexdigest()
 
-    def create_manifest_components(self) -> Tuple:
+    def create_manifest_components(self) -> tuple:
         """Create the components of the SAFE manifest for the measurement file.
 
         Returns:
