@@ -1,5 +1,6 @@
 import logging
 from collections.abc import Iterable
+from collections import defaultdict
 from datetime import datetime
 from itertools import product
 
@@ -92,19 +93,39 @@ def get_burst_group(
         search_results = [result for result in search_results if result.properties['burst']['subswath'] == swath]
         params.append(f'swath {swath}')
     search_results = [result for result in search_results if result.properties['polarization'] == pol]
+    
     params.append(f'polarization {pol}')
     param_str = ', '.join(params)
-
+    
     if not search_results:
         raise ValueError(f'No bursts found for {param_str}. Check search parameters on Vertex.')
+    
+    # Group bursts by subswath for easier processing
+    swath_groups = defaultdict(list)
+    for result in search_results:
+        swath_groups[result.properties['burst']['subswath']].append(result)
 
-    if len(search_results) < min_bursts:
-        search_results = add_surrounding_bursts(search_results, min_bursts)
-
-    if len(search_results) < min_bursts:
-        raise ValueError(f'Less than {min_bursts} bursts found for {param_str}. Check search parameters on Vertex.')
-
-    return search_results
+    # Check and add surrounding bursts if needed
+    extended_search_results = []
+    for swath, bursts in swath_groups.items():
+        if len(bursts) < min_bursts:
+            print(f'Got {len(bursts)} bursts for swath {swath} when expecting at least {min_bursts}, adding surrounding bursts...')
+            extended_results = add_surrounding_bursts(bursts, min_bursts)
+            extended_search_results.extend(extended_results)
+        else:
+            extended_search_results.extend(bursts)
+            
+    # Group bursts by subswath for final validation
+    final_swath_groups = defaultdict(list)
+    for result in extended_search_results:
+        final_swath_groups[result.properties['burst']['subswath']].append(result)
+    
+    # Final validation after adding surrounding bursts
+    for swath, bursts in final_swath_groups.items():
+        if len(bursts) < min_bursts:
+            raise ValueError(f'Less than {min_bursts} bursts found for swath {swath} and parameters: {param_str}. Check search parameters on Vertex.')
+            
+    return extended_search_results
 
 
 def sanitize_group_search_inputs(
