@@ -28,7 +28,7 @@ jobs:
           python -m pip install --no-deps .
           pytest -m golden -k 'not test_golden_compare' 
 
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v5
         with:
           name: develop.tar
           path: ./develop.tar
@@ -58,7 +58,7 @@ jobs:
           python -m pip install --no-deps .
           pytest -m golden -k 'not test_golden_compare' 
 
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v5
         with:
           name: main.tar
           path: ./main.tar
@@ -76,7 +76,7 @@ jobs:
         with:
           ref: develop
 
-      - uses: actions/download-artifact@v5
+      - uses: actions/download-artifact@v6
         with:
           merge-multiple: true
 
