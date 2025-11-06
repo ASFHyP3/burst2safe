@@ -8,6 +8,9 @@ and uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [2.0.1]
 
+### Added
+* New builds are now automatically published to PyPI on release.
+
 ### Changed
 * Updated github actions to use ASF's organization GitHub secrets.
 
