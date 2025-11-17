@@ -126,7 +126,26 @@ def get_burst_infos(products: Iterable[S1BurstProduct], work_dir: Path | None) -
 
     return burst_info_list
 
+def remove_duplicate_bursts(burst_info_list: list[BurstInfo]):
+    """
 
+    Args:
+        burst_info_list: List of BurstInfo objects
+
+    Returns:
+        List of BurstInfo objects with duplicates removed
+    """
+
+    burst_by_len = {}
+    for burst_info in burst_info_list:
+        if int(burst_info.length) not in burst_by_len.keys():
+            burst_by_len[burst_info.length] = [burst_info]
+        else:
+            burst_by_len[burst_info.length].append(burst_info)
+
+
+
+    return burst_by_len[max(list(burst_by_len.keys()))]
 def sort_burst_infos(burst_info_list: list[BurstInfo]) -> dict:
     """Sort BurstInfo objects by swath and polarization.
 
