@@ -1,12 +1,12 @@
 import bisect
 import shutil
+from collections import defaultdict
 from collections.abc import Iterable
 from datetime import datetime
 from itertools import product
 from pathlib import Path
 from typing import cast
 
-import numpy as np
 from shapely.geometry import MultiPolygon, Polygon
 
 from burst2safe.base import create_content_unit, create_data_object, create_metadata_object
@@ -101,11 +101,13 @@ class Safe:
                 if len(burst_subset) == 0:
                     burst_range[swath][pol] = [0, 0]
                     continue
+                # Confirms that there are no gaps burst coverage within a swath
                 Swath.check_burst_group_validity(burst_subset)
 
                 burst_ids = [cast(int, info.burst_id) for info in burst_subset]
                 burst_range[swath][pol] = [min(burst_ids), max(burst_ids)]
 
+            # Confirms that bursts are in a single polarization
             start_ids = [id_range[0] for id_range in burst_range[swath].values()]
             if len(set(start_ids)) != 1:
                 raise ValueError(
@@ -119,15 +121,16 @@ class Safe:
         if len(swaths) == 1:
             return
 
-        swath_combos = [[swaths[i], swaths[i + 1]] for i in range(len(swaths) - 1)]
-        working_pol = polarizations[0]
-        for swath1, swath2 in swath_combos:
-            min_diff = burst_range[swath1][working_pol][0] - burst_range[swath2][working_pol][0]
-            if np.abs(min_diff) > 1:
-                raise ValueError(f'Products from swaths {swath1} and {swath2} do not overlap')
-            max_diff = burst_range[swath1][working_pol][1] - burst_range[swath2][working_pol][1]
-            if np.abs(max_diff) > 1:
-                raise ValueError(f'Products from swaths {swath1} and {swath2} do not overlap')
+        # Confirms that there are no gaps in swath coverage for each burst
+        burst_id_dict: dict[int, list[int]] = defaultdict(list)
+        for swath, info in burst_range.items():
+            for num in set(next(iter(info.values()))):
+                burst_id_dict[num].append(int(swath[-1]))
+
+        for id, burst_swaths in burst_id_dict.items():
+            if max(burst_swaths) + 1 - min(burst_swaths) > len(burst_swaths):
+                msg = f'No included burst can have gaps in swath coverage.\nFound {id}: {[f"IW{n}" for n in burst_swaths]}.'
+                raise ValueError(msg)
 
     def get_name(self, unique_id: str = '0000') -> str:
         """Create a name for the SAFE file.
