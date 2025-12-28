@@ -90,7 +90,9 @@ class Swath:
         if len(polarizations) != 1:
             raise ValueError(f'All bursts must have the same polarization. Found: {polarizations}.')
 
+        #remove duplicates and check for burst order
         burst_ids = [cast(int, x.burst_id) for x in burst_infos]
+        burst_ids = list(set(burst_ids))
         burst_ids.sort()
         if burst_ids != list(range(min(burst_ids), max(burst_ids) + 1)):
             raise ValueError(f'All bursts must have consecutive burst IDs. Found: {burst_ids}.')

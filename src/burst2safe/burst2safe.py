@@ -29,6 +29,7 @@ def burst2safe(
     all_anns: bool = False,
     keep_files: bool = False,
     work_dir: Path | None = None,
+    remove_duplicates: bool = False,
 ) -> Path:
     """Convert a set of burst granules to the ESA SAFE format.
 
@@ -49,6 +50,7 @@ def burst2safe(
         all_anns: Include product annotation files for all swaths, regardless of included bursts
         keep_files: Keep the intermediate files
         work_dir: The directory to create the SAFE in (default: current directory)
+        remove_duplicates: If there is a duplicated burst ID in the download, remove one of the duplicate bursts.
     """
     work_dir = utils.optional_wd(work_dir)
 
@@ -66,6 +68,10 @@ def burst2safe(
     print('Creating SAFE...')
     [info.add_shape_info() for info in burst_infos]
     [info.add_start_stop_utc() for info in burst_infos]
+
+    if remove_duplicates:
+        print("removing duplicates")
+        burst_infos = utils.remove_duplicate_bursts(burst_infos)
 
     safe = Safe(burst_infos, all_anns, work_dir)
     safe_path = safe.create_safe()
@@ -101,7 +107,7 @@ def main() -> None:
     )
     parser.add_argument('--output-dir', type=str, default=None, help='Output directory to save to')
     parser.add_argument('--keep-files', action='store_true', default=False, help='Keep the intermediate files')
-
+    parser.add_argument('--remove-duplicate-bursts', action='store_true', default=False)
     args = utils.reparse_args(parser.parse_args(), tool='burst2safe')
 
     burst2safe(
@@ -115,4 +121,5 @@ def main() -> None:
         all_anns=args.all_anns,
         keep_files=args.keep_files,
         work_dir=args.output_dir,
+        remove_duplicates=args.remove_duplicate_bursts
     )
