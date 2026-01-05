@@ -221,7 +221,7 @@ class Safe:
         calibration_dir.mkdir(parents=True, exist_ok=True)
         measurements_dir.mkdir(parents=True, exist_ok=True)
         icon_dir.mkdir(parents=True, exist_ok=True)
-        if self.major_version >= 3 and self.minor_version >= 40:
+        if self.major_version >= 4 or (self.major_version >= 3 and self.minor_version >= 40):
             rfi_dir.mkdir(parents=True, exist_ok=True)
 
         shutil.copytree(self.support_dir, self.safe_path / 'support', dirs_exist_ok=True)
@@ -357,6 +357,24 @@ class Safe:
 
         return content_units, metadata_objects, data_objects
 
+    def add_measurement_dmdid(self, measurement_content, metadata_objects):
+        """Add a dmdID attribute to the measurement content unit.
+
+        The dmdID (data and metadata identifier) is a space-separated list of the
+        IDs of all metadata objects associated with the measurement data.
+
+        Args:
+            measurement_content: The measurement content unit XML element.
+            metadata_objects: A list of metadata object XML elements.
+
+        Returns:
+            The measurement content unit with the dmdID attribute added.
+        """
+        simple_names = [obj.attrib['ID'] for obj in metadata_objects]
+        dmdid = ' '.join(simple_names) + ' '
+        measurement_content.set('dmdID', dmdid)
+        return measurement_content
+
     def compile_manifest_components(self) -> tuple[list, list, list]:
         """Compile the manifest components for all files within the SAFE file.
 
@@ -373,6 +391,7 @@ class Safe:
                 metadata_objects.append(metadata_object)
                 data_objects.append(date_object)
             measurement_content, measurement_data = swath.measurement.create_manifest_components()
+            measurement_content = self.add_measurement_dmdid(measurement_content, metadata_objects)
             content_units.append(measurement_content)
             data_objects.append(measurement_data)
 
@@ -450,3 +469,4 @@ class Safe:
         for file in to_delete:
             assert file is not None
             file.unlink()
+
