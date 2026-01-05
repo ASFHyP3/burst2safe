@@ -52,7 +52,7 @@ class Swath:
 
         self.rfi_name = None
         self.has_rfi = False
-        if self.major_version >= 4 or (self.major_version >= 3 and self.minor_version >= 40):
+        if self.major_version >= 4 or (self.major_version == 3 and self.minor_version >= 40):
             self.has_rfi = True
             self.rfi_name = self.safe_path / 'annotation' / 'rfi' / f'rfi-{self.name}.xml'
 
