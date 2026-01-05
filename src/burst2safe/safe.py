@@ -221,7 +221,7 @@ class Safe:
         calibration_dir.mkdir(parents=True, exist_ok=True)
         measurements_dir.mkdir(parents=True, exist_ok=True)
         icon_dir.mkdir(parents=True, exist_ok=True)
-        if self.major_version >= 4 or (self.major_version >= 3 and self.minor_version >= 40):
+        if self.major_version >= 4 or (self.major_version == 3 and self.minor_version >= 40):
             rfi_dir.mkdir(parents=True, exist_ok=True)
 
         shutil.copytree(self.support_dir, self.safe_path / 'support', dirs_exist_ok=True)
