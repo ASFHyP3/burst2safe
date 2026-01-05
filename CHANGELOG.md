@@ -9,7 +9,7 @@ and uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 ## [2.0.2]
 
 ### Fixed
-* Reversal of content_unit and rep_id in creation of measurement content unit.
+* Swapping of `unit_type` and `rep_id` in creation of measurement content unit.
 * Lack of dmdID attribute for the `s1Level1MeasurementSchema` content unit.
 * Version checks that did not account for major versions greater than 3.
 
