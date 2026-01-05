@@ -1,6 +1,7 @@
 from collections import namedtuple
 from copy import deepcopy
 
+import lxml.etree as ET
 import pytest
 from shapely.geometry import Polygon
 
@@ -114,3 +115,10 @@ class TestSafe:
         assert (safe.safe_path / 'annotation' / 'calibration').exists()
         assert (safe.safe_path / 'support').exists()
         assert len(list((safe.safe_path / 'support').glob('*'))) == 9
+
+    def test_add_measurement_dmdid(self, burst_infos, tmp_path):
+        safe = Safe(burst_infos, work_dir=tmp_path)
+        measurement_content = ET.Element('content')
+        metadata_objects = [ET.Element('object', ID='p1'), ET.Element('object', ID='p2')]
+        measurement_content = safe.add_measurement_dmdid(measurement_content, metadata_objects)
+        assert measurement_content.get('dmdID') == 'p1 p2 '
