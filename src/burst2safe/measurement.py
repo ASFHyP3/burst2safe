@@ -157,7 +157,7 @@ class Measurement:
         safe_path = Path(*self.path.parts[: safe_index + 1])
         relative_path = self.path.relative_to(safe_path)
 
-        content_unit = create_content_unit(simple_name, rep_id, unit_type)
+        content_unit = create_content_unit(simple_name, unit_type, rep_id)
         assert self.size_bytes is not None
         assert self.md5 is not None
         data_object = create_data_object(simple_name, relative_path, rep_id, mime_type, self.size_bytes, self.md5)

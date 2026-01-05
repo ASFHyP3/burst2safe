@@ -81,7 +81,7 @@ class Manifest:
     def create_information_package_map(self):
         """Create the information package map."""
         xdfu_ns = NAMESPACES['xfdu']
-        information_package_map = ET.Element(f'{{{xdfu_ns}}}informationPackageMap')
+        information_package_map = ET.Element('informationPackageMap')
         parent_content_unit = ET.Element(
             f'{{{xdfu_ns}}}contentUnit',
             unitType='SAFE Archive Information Package',

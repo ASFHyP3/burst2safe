@@ -31,7 +31,7 @@ class TestManifest:
     def test_create_information_package_map(self, manifest):
         manifest.create_information_package_map()
         assert manifest.information_package_map is not None
-        assert manifest.information_package_map.tag == '{urn:ccsds:schema:xfdu:1}informationPackageMap'
+        assert manifest.information_package_map.tag == 'informationPackageMap'
         assert len(manifest.information_package_map.find('{urn:ccsds:schema:xfdu:1}contentUnit')) == 1
 
     def test_create_metadata_section(self, manifest):
