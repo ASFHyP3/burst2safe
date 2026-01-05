@@ -11,7 +11,7 @@ and uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 ### Fixed
 * Swapping of `unit_type` and `rep_id` in creation of measurement content unit.
 * Lack of dmdID attribute for the `s1Level1MeasurementSchema` content unit.
-* Version checks that did not account for major versions greater than 3.
+* IPF version checks that did not account for major versions greater than 3.
 
 ## [2.0.1]
 
