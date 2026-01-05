@@ -125,7 +125,7 @@ class Noise(Annotation):
         assert self.ads_header is not None
         noise.append(self.ads_header)
 
-        if self.major_version >= 4 or (self.major_version >= 3 or self.minor_version >= 90):
+        if self.major_version >= 4 or (self.major_version == 3 and self.minor_version >= 90):
             self.create_range_vector_list()
             self.create_azimuth_vector_list()
             assert self.range_vector_list is not None
