@@ -6,6 +6,7 @@ from itertools import product
 from pathlib import Path
 from typing import cast
 
+import lxml.etree as ET
 import numpy as np
 from shapely.geometry import MultiPolygon, Polygon
 
@@ -357,7 +358,9 @@ class Safe:
 
         return content_units, metadata_objects, data_objects
 
-    def add_measurement_dmdid(self, measurement_content, metadata_objects):
+    def add_measurement_dmdid(
+        self, measurement_content: ET._Element, metadata_objects: list[ET._Element]
+    ) -> ET._Element:
         """Add a dmdID attribute to the measurement content unit.
 
         The dmdID (data and metadata identifier) is a space-separated list of the
@@ -370,7 +373,7 @@ class Safe:
         Returns:
             The measurement content unit with the dmdID attribute added.
         """
-        simple_names = [obj.attrib['ID'] for obj in metadata_objects]
+        simple_names = [str(obj.attrib['ID']) for obj in metadata_objects]
         dmdid = ' '.join(simple_names) + ' '
         measurement_content.set('dmdID', dmdid)
         return measurement_content
@@ -469,4 +472,3 @@ class Safe:
         for file in to_delete:
             assert file is not None
             file.unlink()
-
