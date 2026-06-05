@@ -1,0 +1,34 @@
+cff-version: 1.2.0
+message: "If you use this software, please cite it as below."
+type: software
+title: "burst2safe"
+abstract: "A package for converting ASF-derived Sentinel-1 burst SLC products to the ESA SAFE format."
+authors:
+  - family-names: Williams
+    given-names: Forrest
+    email: ffwilliams2@alaska.edu
+  - family-names: Herrmann
+    given-names: Jake
+  - name: mfangaritav
+  - family-names: Johnston
+    given-names: Andrew
+  - family-names: Player
+    given-names: Andrew
+  - family-names: Kennedy
+    given-names: Joseph H
+  - family-names: Smale
+    given-names: Jacquelyn
+  - family-names: Horn
+    given-names: William
+repository-code: "https://github.com/ASFHyP3/burst2safe"
+url: "https://github.com/ASFHyP3/burst2safe"
+license: BSD-3-Clause
+doi: 10.5281/zenodo.14538103
+version: "2.0.2"
+date-released: "2026-01-06"
+keywords:
+  - SAR
+  - Sentinel-1
+  - SAFE
+  - burst
+  - remote sensing

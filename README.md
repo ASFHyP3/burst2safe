@@ -1,4 +1,6 @@
 # burst2safe
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.14538103.svg)](https://doi.org/10.5281/zenodo.14538103)
+
 Utility for converting ASF-derived Sentinel-1 burst SLC products to the ESA SAFE format.
 
 ## Processor Compatibility
@@ -193,6 +195,16 @@ i.e. result in a different SAFE structure compared with the previous version:
 If there were no new "important" versions, you're done.
 Otherwise, see https://github.com/ASFHyP3/burst2safe/issues/244 for a sketch of the steps for adding new important versions,
 and then update this README section with the complete steps when you're done.
+
+## Citation
+
+If you use `burst2safe` in your research, please cite it. The recommended citation for the latest release is:
+
+> Forrest Williams, Jake Herrmann, mfangaritav, Andrew Johnston, Andrew Player, Joseph H Kennedy, Jacquelyn Smale, & William Horn. (2026). ASFHyP3/burst2safe: burst2safe v2.0.2 (v2.0.2). Zenodo. https://doi.org/10.5281/zenodo.18157985
+
+For the most up-to-date citation (including BibTeX and other formats), visit the [Zenodo record](https://doi.org/10.5281/zenodo.14538103).
+
+A `CITATION.cff` file is also included in this repository. GitHub will surface a "Cite this repository" button on the repository homepage that generates citations in APA and BibTeX formats automatically.
 
 ## License
 `burst2safe` is licensed under the BSD 2-Clause License. See the LICENSE file for more details.
