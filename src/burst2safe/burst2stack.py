@@ -6,7 +6,7 @@ from pathlib import Path
 
 from shapely.geometry import Polygon
 
-from burst2safe import utils
+from burst2safe import reparse_args, utils
 from burst2safe.download import download_bursts
 from burst2safe.safe import Safe
 from burst2safe.search import find_group
@@ -113,7 +113,7 @@ def main() -> None:
     parser.add_argument('--keep-files', action='store_true', default=False, help='Keep the intermediate files')
     parser.add_argument('--output-dir', type=str, default=None, help='Output directory to save to')
 
-    args = utils.reparse_args(parser.parse_args(), tool='burst2stack')
+    args = reparse_args.reparse_args(parser.parse_args(), tool='burst2stack')
 
     burst2stack(
         rel_orbit=args.rel_orbit,
