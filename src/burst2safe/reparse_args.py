@@ -8,6 +8,7 @@ from shapely.geometry import box, shape
 
 gdal.UseExceptions()
 
+
 def reparse_args(args: Namespace, tool: str) -> Namespace:
     """Parse the arguments for burst2safe and burst2stack CLIs.
 
@@ -61,6 +62,7 @@ def reparse_args(args: Namespace, tool: str) -> Namespace:
                 )
     return args
 
+
 def vector_to_shapely_latlon_polygon(vector_file_path):
     dataset = ogr.Open(vector_file_path)
 
@@ -89,7 +91,6 @@ def vector_to_shapely_latlon_polygon(vector_file_path):
     dataset = None
 
     return polygon
-
 
 
 def get_bbox(extent):
