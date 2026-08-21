@@ -17,6 +17,7 @@ and uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ### Changed
 
+- GitHub Actions workflows now explicitly set the permissions of the GITHUB_TOKEN.
 - Replaced all standard Python `print` calls with `logging` calls.
 
 ### Fixed
