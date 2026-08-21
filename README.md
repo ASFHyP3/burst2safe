@@ -198,13 +198,7 @@ and then update this README section with the complete steps when you're done.
 
 ## Citation
 
-If you use `burst2safe` in your research, please cite it. The recommended citation for the latest release is:
-
-> Forrest Williams, Jake Herrmann, mfangaritav, Andrew Johnston, Andrew Player, Joseph H Kennedy, Jacquelyn Smale, & William Horn. (2026). ASFHyP3/burst2safe: burst2safe v2.0.2 (v2.0.2). Zenodo. https://doi.org/10.5281/zenodo.18157985
-
-For the most up-to-date citation (including BibTeX and other formats), visit the [Zenodo record](https://doi.org/10.5281/zenodo.14538103).
-
-A `CITATION.cff` file is also included in this repository. GitHub will surface a "Cite this repository" button on the repository homepage that generates citations in APA and BibTeX formats automatically.
+If you use `burst2safe` in your research, please cite it. Use the "Cite this repository" button on the repository homepage to get an APA or BibTeX formatted citation of the `burst2safe` project (all versions). To cite a specific version, or for other formats, please visit the [Zenodo record](https://doi.org/10.5281/zenodo.14538103).
 
 ## License
 `burst2safe` is licensed under the BSD 2-Clause License. See the LICENSE file for more details.
