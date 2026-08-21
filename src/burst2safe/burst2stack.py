@@ -1,5 +1,6 @@
 """A tool for converting stacks of ASF burst SLCs to stacks of SAFEs"""
 
+import logging
 from argparse import ArgumentParser
 from datetime import datetime
 from pathlib import Path
@@ -10,6 +11,9 @@ from burst2safe import utils
 from burst2safe.download import download_bursts
 from burst2safe.safe import Safe
 from burst2safe.search import find_group
+
+
+logger = logging.getLogger(__name__)
 
 
 DESCRIPTION = """Convert a stack of ASF burst SLCs to a stack of ESA SAFEs.
@@ -61,19 +65,19 @@ def burst2stack(
     )
     burst_infos = utils.get_burst_infos(burst_search_results, work_dir)
     abs_orbits = utils.drop_duplicates([burst_info.absolute_orbit for burst_info in burst_infos])
-    print(f'Found {len(burst_infos)} burst(s), comprising {len(abs_orbits)} SAFE(s).')
+    logger.info(f'Found {len(burst_infos)} burst(s), comprising {len(abs_orbits)} SAFE(s).')
 
-    print('Check burst group validities...')
+    logger.info('Check burst group validities...')
     burst_sets = [[bi for bi in burst_infos if bi.absolute_orbit == orbit] for orbit in abs_orbits]
     # Checking burst group validities before download to fail faster
     for burst_set in burst_sets:
         Safe.check_group_validity(burst_set)
 
-    print('Downloading data...')
+    logger.info('Downloading data...')
     download_bursts(burst_infos)
-    print('Download complete.')
+    logger.info('Download complete.')
 
-    print('Creating SAFEs...')
+    logger.info('Creating SAFEs...')
     safe_paths = []
     for burst_set in burst_sets:
         [info.add_shape_info() for info in burst_set]
@@ -83,7 +87,7 @@ def burst2stack(
         safe_paths.append(safe_path)
         if not keep_files:
             safe.cleanup()
-    print('SAFEs created!')
+    logger.info('SAFEs created!')
 
     return safe_paths
 
@@ -112,8 +116,23 @@ def main() -> None:
     )
     parser.add_argument('--keep-files', action='store_true', default=False, help='Keep the intermediate files')
     parser.add_argument('--output-dir', type=str, default=None, help='Output directory to save to')
+    parser.add_argument(
+        '-v', '--verbose', action='count', default=0, help='Increase the logging verbosity. Can be used multiple times.'
+    )
 
     args = utils.reparse_args(parser.parse_args(), tool='burst2stack')
+
+    logging.basicConfig(
+        format='%(asctime)s - %(levelname)s - %(message)s', datefmt='%m/%d/%Y %I:%M:%S %p', level=logging.INFO
+    )
+
+    if args.verbose > 0:
+        logger.setLevel(logging.DEBUG)
+    if args.verbose < 2:
+        import asf_search
+
+        asf_logger = logging.getLogger(asf_search.__name__)
+        asf_logger.disabled = True
 
     burst2stack(
         rel_orbit=args.rel_orbit,

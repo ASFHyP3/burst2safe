@@ -15,24 +15,22 @@ where = ["src"]
 name = "burst2safe"
 requires-python = ">=3.10"
 dynamic = ["version"]
-authors = [
-    {name="Forrest Williams", email="ffwilliams2@alaska.edu"},
-]
+authors = [{ name = "Forrest Williams", email = "ffwilliams2@alaska.edu" }]
 maintainers = [
-    {name="ASF APD/Tools Team", email="uaf-asf-apd@alaska.edu"},
+  { name = "ASF APD/Tools Team", email = "uaf-asf-apd@alaska.edu" },
 ]
 
 description = "A package for converting ASF-derived Sentinel-1 burst SLC products to the ESA SAFE format"
 readme = "README.md"
-classifiers=[
-    "Intended Audience :: Science/Research",
-    "Natural Language :: English",
-    "Operating System :: OS Independent",
-    "Programming Language :: Python :: 3",
-    "Programming Language :: Python :: 3.10",
-    "Programming Language :: Python :: 3.11",
-    "Programming Language :: Python :: 3.12",
-    "Programming Language :: Python :: 3.13",
+classifiers = [
+  "Intended Audience :: Science/Research",
+  "Natural Language :: English",
+  "Operating System :: OS Independent",
+  "Programming Language :: Python :: 3",
+  "Programming Language :: Python :: 3.10",
+  "Programming Language :: Python :: 3.11",
+  "Programming Language :: Python :: 3.12",
+  "Programming Language :: Python :: 3.13",
 ]
 dependencies = [
   "gdal",
@@ -47,7 +45,7 @@ dependencies = [
 
 [project.urls]
 Homepage = "https://github.com/ASFHyP3/burst2safe"
-"Bug Tracker" ="https://github.com/ASFHyP3/burst2safe/issues"
+"Bug Tracker" = "https://github.com/ASFHyP3/burst2safe/issues"
 
 [project.scripts]
 burst2safe = "burst2safe.burst2safe:main"
@@ -55,9 +53,7 @@ burst2stack = "burst2safe.burst2stack:main"
 local2safe = "burst2safe.local2safe:main"
 
 [project.optional-dependencies]
-develop = [
-    "pytest",
-]
+develop = ["pytest"]
 
 [tool.pytest.ini_options]
 minversion = "6.0"
@@ -77,12 +73,12 @@ quote-style = "single"
 
 [tool.ruff.lint]
 extend-select = [
-    "I",   # isort: https://docs.astral.sh/ruff/rules/#isort-i
-    "UP",  # pyupgrade: https://docs.astral.sh/ruff/rules/#pyupgrade-up
-    # TODO: Uncomment the following extensions and address their warnings:
-    # "D",   # pydocstyle: https://docs.astral.sh/ruff/rules/#pydocstyle-d
-    # "ANN", # annotations: https://docs.astral.sh/ruff/rules/#flake8-annotations-ann
-    # "PTH", # use-pathlib-pth: https://docs.astral.sh/ruff/rules/#flake8-use-pathlib-pth
+  "I",  # isort: https://docs.astral.sh/ruff/rules/#isort-i
+  "UP", # pyupgrade: https://docs.astral.sh/ruff/rules/#pyupgrade-up
+  # TODO: Uncomment the following extensions and address their warnings:
+  # "D",   # pydocstyle: https://docs.astral.sh/ruff/rules/#pydocstyle-d
+  # "ANN", # annotations: https://docs.astral.sh/ruff/rules/#flake8-annotations-ann
+  # "PTH", # use-pathlib-pth: https://docs.astral.sh/ruff/rules/#flake8-use-pathlib-pth
 ]
 
 [tool.ruff.lint.pydocstyle]
@@ -99,7 +95,7 @@ suppress-dummy-args = true
 "tests/*" = ["D1", "ANN"]
 
 [tool.mypy]
-python_version = "3.10"
+python_version = ""
 warn_redundant_casts = true
 warn_unused_ignores = true
 warn_unreachable = true

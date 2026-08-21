@@ -6,237 +6,302 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [PEP 440](https://www.python.org/dev/peps/pep-0440/)
 and uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.0.3]
+
+### Added
+
+- Added a `citation.cff` file to provide citation metadata for `burst2safe`.
+- Added a GitHub Action workflow to validate changes to the `citation.cff` file.
+- Added a Zenodo "project" DOI to the README that will always resolve to the latest version on Zenodo.
+- Added the `--vebose`/`-v` argument to `burst2safe`, `burst2stack`, and `local2safe` to enable and increment logging levels. A verbosity of 0 disables logging within `asf_search`, 1 enables `DEBUG` in the used CLI tool, and 2 additionally enables `asf_search`'s logging.
+
+### Changed
+
+- GitHub Actions workflows now explicitly set the permissions of the GITHUB_TOKEN.
+- Replaced all standard Python `print` calls with `logging` calls.
+
+### Fixed
+
+- Fixed mypy by setting `python_version = ""`.
+
 ## [2.0.2]
 
 ### Fixed
-* Swapping of `unit_type` and `rep_id` in creation of measurement content unit in manifest.
-* Lack of dmdID attribute for the `s1Level1MeasurementSchema` content unit in manifest.
-* Namespace of `informationPackageMap` element in manifest.
-* IPF version checks that did not account for major versions greater than 3.
+
+- Swapping of `unit_type` and `rep_id` in creation of measurement content unit in manifest.
+- Lack of dmdID attribute for the `s1Level1MeasurementSchema` content unit in manifest.
+- Namespace of `informationPackageMap` element in manifest.
+- IPF version checks that did not account for major versions greater than 3.
 
 ## [2.0.1]
 
 ### Added
-* New builds are now automatically published to PyPI on release.
+
+- New builds are now automatically published to PyPI on release.
 
 ### Changed
-* Updated github actions to use ASF's organization GitHub secrets.
+
+- Updated GitHub actions to use ASF's organization GitHub secrets.
 
 ## [2.0.0]
 
 ### Added
-* Added official support for Python 3.13.
+
+- Added official support for Python 3.13.
 
 ### Changed
-* Removed `numpy<2.1.0` pin introduced in v1.1.1.
-* Upgraded aiohttp library to >=3.12.6, avoiding wrong requests in asynchronous tasks.
-* Enable [`pyupgrade (UP)`](https://docs.astral.sh/ruff/rules/#pyupgrade-up) for ruff and fix the resulting warnings.
+
+- Removed `numpy<2.1.0` pin introduced in v1.1.1.
+- Upgraded aiohttp library to >=3.12.6, avoiding wrong requests in asynchronous tasks.
+- Enable [`pyupgrade (UP)`](https://docs.astral.sh/ruff/rules/#pyupgrade-up) for ruff and fix the resulting warnings.
 
 ### Removed
-* Removed support for Python 3.9.
+
+- Removed support for Python 3.9.
 
 ### Fixed
-* Removed `warnings.filterwarnings('ignore')` and replacing it by disabling the `asf_search` logger. Fixes https://github.com/ASFHyP3/burst2safe/issues/160
-* Avoid catching ValueError exception twice when handling the `--extent` option. Fixes https://github.com/ASFHyP3/burst2safe/issues/129
-* Allow burst without RFI detection from noise report. Fixes https://github.com/ASFHyP3/burst2safe/issues/133
-* Fix typo by renaming `burst2safe.product.Product.qulatity_information` to `burst2safe.product.Product.quality_information`.
+
+- Removed `warnings.filterwarnings('ignore')` and replacing it by disabling the `asf_search` logger. Fixes <https://github.com/ASFHyP3/burst2safe/issues/160>
+- Avoid catching ValueError exception twice when handling the `--extent` option. Fixes <https://github.com/ASFHyP3/burst2safe/issues/129>
+- Allow burst without RFI detection from noise report. Fixes <https://github.com/ASFHyP3/burst2safe/issues/133>
+- Fix typo by renaming `burst2safe.product.Product.qulatity_information` to `burst2safe.product.Product.quality_information`.
 
 ## [1.4.5]
 
 ### Fixed
-* `burst2safe.download.download_bursts_async()` now makes a single Earthdata Login authorization request prior to
-  downloading individual burst products and re-uses the same session cookie for each download. Fixes https://github.com/ASFHyP3/burst2safe/issues/170.
-* The `--extent` option of `burst2stack` is now required. Fixes https://github.com/ASFHyP3/burst2safe/issues/174.
+
+- `burst2safe.download.download_bursts_async()` now makes a single Earthdata Login authorization request prior to
+  downloading individual burst products and re-uses the same session cookie for each download. Fixes <https://github.com/ASFHyP3/burst2safe/issues/170>.
+- The `--extent` option of `burst2stack` is now required. Fixes <https://github.com/ASFHyP3/burst2safe/issues/174>.
 
 ## [1.4.4]
 
 ### Changed
-* Fixed typo in naming SAFE file using VH and HV polarizations.
+
+- Fixed typo in naming SAFE file using VH and HV polarizations.
 
 ## [1.4.3]
 
 ### Changed
-* Updated IPF version tests for versions >=3.80 and verified compatibility with Sentinel-1C data.
+
+- Updated IPF version tests for versions >=3.80 and verified compatibility with Sentinel-1C data.
 
 ## [1.4.2]
 
 ### Changed
-* Upgraded the `reusable-mypy` action to [v0.15.0](https://github.com/ASFHyP3/actions/releases/tag/v0.15.0) and replaced the `--ignore-missing-imports` option with `disable_error_code = ["import-untyped"]` as recommended by <https://github.com/ASFHyP3/actions/issues/225>, then ignored or fixed the resulting `mypy` errors.
+
+- Upgraded the `reusable-mypy` action to [v0.15.0](https://github.com/ASFHyP3/actions/releases/tag/v0.15.0) and replaced the `--ignore-missing-imports` option with `disable_error_code = ["import-untyped"]` as recommended by <https://github.com/ASFHyP3/actions/issues/225>, then ignored or fixed the resulting `mypy` errors.
 
 ## [1.4.1]
 
 ### Added
-* The [`static-analysis`](.github/workflows/static-analysis.yml) workflow now includes `mypy` for type checking.
+
+- The [`static-analysis`](.github/workflows/static-analysis.yml) workflow now includes `mypy` for type checking.
 
 ### Removed
-* Removed `black` from the [`static-analysis`](.github/workflows/static-analysis.yml) workflow.
+
+- Removed `black` from the [`static-analysis`](.github/workflows/static-analysis.yml) workflow.
 
 ### Fixed
-* Add missing [`src/burst2safe/__init__.py`](./src/burst2safe/__init__.py) file.
+
+- Add missing [`src/burst2safe/__init__.py`](./src/burst2safe/__init__.py) file.
 
 ## [1.4.0]
 
 ### Added
-* download.py to support asynchronous downloads.
-* Support for EDL token based authentication.
+
+- download.py to support asynchronous downloads.
+- Support for EDL token based authentication.
 
 ### Changed
-* Authorization behavior so that EDL credentials from an EDL token are prioritized above a username/password in either a netrc or the environment.
-* Authorization behavior so that EDL username/password from a user's netrc are prioritized. Now writes username/password to the netrc if they are provided as environment variables.
-* Switched to an asynchronous download approach.
-* In burst2stack.py all input files are now downloaded first.
+
+- Authorization behavior so that EDL credentials from an EDL token are prioritized above a username/password in either a netrc or the environment.
+- Authorization behavior so that EDL username/password from a user's netrc are prioritized. Now writes username/password to the netrc if they are provided as environment variables.
+- Switched to an asynchronous download approach.
+- In burst2stack.py all input files are now downloaded first.
 
 ## [1.3.1]
 
 ### Changed
-* Updated the [LICENSE](./LICENSE), CICD workflows, and documentation to reflect that this project is now managed by the ASF Tools team (previously Forrest Williams was the sole contributor).
-* Update `ruff` configuration to conform to our latest standards.
+
+- Updated the [LICENSE](./LICENSE), CICD workflows, and documentation to reflect that this project is now managed by the ASF Tools team (previously Forrest Williams was the sole contributor).
+- Update `ruff` configuration to conform to our latest standards.
 
 ## [1.3.0]
 
 ### Added
-* Capability for `local2safe` to take multiple bursts as input
+
+- Capability for `local2safe` to take multiple bursts as input
 
 ### Changed
-* Interface for `local2safe` so that it takes a dictionary describing a set of bursts as input
-* `local2safe` CLI so that it takes a JSON describing a set of bursts as input
+
+- Interface for `local2safe` so that it takes a dictionary describing a set of bursts as input
+- `local2safe` CLI so that it takes a JSON describing a set of bursts as input
 
 ## [1.2.0]
 
 ### Added
-* `local2safe`, a utility that creates single-burst SAFEs using burst extractor data and metadata outputs that are available locally.
-* `burst_id.py`, using functionality created by Ben Barton, calculates a burst's ESA Burst ID.
+
+- `local2safe`, a utility that creates single-burst SAFEs using burst extractor data and metadata outputs that are available locally.
+- `burst_id.py`, using functionality created by Ben Barton, calculates a burst's ESA Burst ID.
 
 ## [1.1.1]
 
 ### Changed
-* Slightly refactored `measurement.create_geotiff` to create a blank geotiff first, then write to it
-* Reduced tifffile minimum version from 2024.0.0 to 2022.04.022 to support ISCE2 workflows.
-* Pinned numpy to < 2.1.0 to avoid [this data type issue](https://github.com/shapely/shapely/issues/2098)
+
+- Slightly refactored `measurement.create_geotiff` to create a blank geotiff first, then write to it
+- Reduced tifffile minimum version from 2024.0.0 to 2022.04.022 to support ISCE2 workflows.
+- Pinned numpy to < 2.1.0 to avoid [this data type issue](https://github.com/shapely/shapely/issues/2098)
 
 ## [1.1.0]
 
 ### Added
-* Preview directory with all components except quick-look
-* KML and Preview SAFE components
-* KML, product-preview, and schema components to manifest
+
+- Preview directory with all components except quick-look
+- KML and Preview SAFE components
+- KML, product-preview, and schema components to manifest
 
 ### Changed
-* Creation time of measurement tiffs is now set to the end of SLC processing. This ensures consistent filenames of repeatedly created SAFEs because the name is dependent on measurement tiff checksums.
+
+- Creation time of measurement tiffs is now set to the end of SLC processing. This ensures consistent filenames of repeatedly created SAFEs because the name is dependent on measurement tiff checksums.
 
 ### Fixed
-* KML preview file is now included to support processors that grab the SAFE footprint from this file.
+
+- KML preview file is now included to support processors that grab the SAFE footprint from this file.
 
 ## [1.0.0]
 
 ### Added
-* Marked version 1.0.0 release of package. Package is now stable enough to use in production workloads.
+
+- Marked version 1.0.0 release of package. Package is now stable enough to use in production workloads.
 
 ## [0.6.0]
 
 ### Added
-* Support for EW collection mode SLCs.
+
+- Support for EW collection mode SLCs.
 
 ## [0.5.0]
 
 ### Added
-* Support for [s1-reader](https://github.com/isce-framework/s1-reader) and OPERA workflows by adding ability to include 0-burst annotation files when using `--all-anns` CLI flag.
+
+- Support for [s1-reader](https://github.com/isce-framework/s1-reader) and OPERA workflows by adding ability to include 0-burst annotation files when using `--all-anns` CLI flag.
 
 ## [0.4.2]
 
 ### Added
-* Support for Python 3.9
+
+- Support for Python 3.9
 
 ## [0.4.1]
 
 ### Fixed
-* Bug in CLI parsing of granule case for `burst2safe`.
+
+- Bug in CLI parsing of granule case for `burst2safe`.
 
 ### Removed
-* `--pols` as a required argument for `burst2safe` and `burst2stack`. Default value is now `VV`.
+
+- `--pols` as a required argument for `burst2safe` and `burst2stack`. Default value is now `VV`.
 
 ## [0.4.0]
 
 ### Added
-* `burst2stack` tool for creating stacks of SAFEs.
-* The ability to specify swaths and minimum number of bursts when using tool.
-* The ability to specify the SAFE extent by either bounding box or vector file.
+
+- `burst2stack` tool for creating stacks of SAFEs.
+- The ability to specify swaths and minimum number of bursts when using tool.
+- The ability to specify the SAFE extent by either bounding box or vector file.
 
 ### Fixed
-* `Safe.get_name()` so that it correctly parses `Safe` objects with only cross-pol data.
+
+- `Safe.get_name()` so that it correctly parses `Safe` objects with only cross-pol data.
 
 ### Changed
-* Moved all search/download functionality to `search.py` module.
-* `--bbox` argument to `--extent`.
+
+- Moved all search/download functionality to `search.py` module.
+- `--bbox` argument to `--extent`.
 
 ## [0.3.5]
 
 ### Fixed
-* Polarization code now accurately reflects bursts contained in SAFE.
-* Measurement GeoTiff metadata now correctly specifies Sentinel-1 A or B.
+
+- Polarization code now accurately reflects bursts contained in SAFE.
+- Measurement GeoTiff metadata now correctly specifies Sentinel-1 A or B.
 
 ### Added
-* CLI argument for specifying output directory.
+
+- CLI argument for specifying output directory.
 
 ## [0.3.4]
 
 ### Added
-* Separate check of Earthdata credentials prior to download.
+
+- Separate check of Earthdata credentials prior to download.
 
 ## [0.3.3]
 
 ### Added
-* Retries of download functionality to improve robustness of download step.
+
+- Retries of download functionality to improve robustness of download step.
 
 ## [0.3.2]
 
 ### Fixed
-* Bug introduced in `0.3.1` where the `download_bursts` function would not work for a single worker.
+
+- Bug introduced in `0.3.1` where the `download_bursts` function would not work for a single worker.
 
 ## [0.3.1]
 
 ### Fixed
-* Race condition in `download_bursts` function by switching to parallel, instead of threaded, downloads.
+
+- Race condition in `download_bursts` function by switching to parallel, instead of threaded, downloads.
 
 ## [0.3.0]
 
 ### Added
-* Support for IPF >=3.40 RFI annotation files.
-* Support for IPF <=2.90.
-* IPF-specific support files.
-* Calculation of `platformHeading` and `burst/byteOffset` fields.
+
+- Support for IPF >=3.40 RFI annotation files.
+- Support for IPF <=2.90.
+- IPF-specific support files.
+- Calculation of `platformHeading` and `burst/byteOffset` fields.
 
 ### Fixed
-* Path information for annotation/measurement files are now are updated when the SAFE path is.
-* Bug when burst widths are different by one pixel
+
+- Path information for annotation/measurement files are now are updated when the SAFE path is.
+- Bug when burst widths are different by one pixel
 
 ### Changed
-* Test suite to use test data from 2024 (IPF version 3.71).
+
+- Test suite to use test data from 2024 (IPF version 3.71).
 
 ## [0.2.0]
 
 ### Added
-* Functionality for ensure input bursts are eligible for merging.
-* A test suite for the library.
-* Docstrings for the majority of methods/functions.
-* Bounding-box based interface for specifying bursts to merge.
-* Removal of intermediate files after merging.
+
+- Functionality for ensure input bursts are eligible for merging.
+- A test suite for the library.
+- Docstrings for the majority of methods/functions.
+- Bounding-box based interface for specifying bursts to merge.
+- Removal of intermediate files after merging.
 
 ### Changed
-* Refactored many components of the library to enable simpler testing.
-* Correctly set product unique identifier in SAFE name.
+
+- Refactored many components of the library to enable simpler testing.
+- Correctly set product unique identifier in SAFE name.
 
 ## [0.1.0]
 
 ### Added
-* First working version of the library.
+
+- First working version of the library.
 
 ## [0.0.1]
 
 ### Added
-* Create project structure and CI/CD tooling.
+
+- Create project structure and CI/CD tooling.
 
 ## [0.0.0]
 
 ### Added
-* Initial version of project.
+
+- Initial version of project.

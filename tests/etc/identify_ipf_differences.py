@@ -16,6 +16,7 @@ IPF Changelog: https://sar-mpc.eu/processor/ipf/
 """
 
 import argparse
+import logging
 import os
 import shutil
 from dataclasses import dataclass
@@ -26,6 +27,9 @@ import asf_search as asf
 import lxml.etree as ET
 
 from burst2safe.utils import get_burst_infos
+
+
+logger = logging.getLogger(__name__)
 
 
 @dataclass
@@ -61,6 +65,11 @@ VERSIONS = [
     Version('3.80', True),
     Version('3.90', False),
     Version('3.91', False),
+    Version('3.92', False),
+    Version('4.00', False),
+    Version('4.01', False),
+    Version('4.02', False),
+    Version('4.03', False),
 ]
 
 
@@ -80,7 +89,7 @@ def find_representative_bursts(important_only=False):
             continue
         matching_version = [x for x in results if x.umm['PGEVersionClass']['PGEVersion'] == f'00{version.id}']
         if len(matching_version) == 0:
-            print(f'No bursts with version {version.id} found')
+            logging.info(f'No bursts with version {version.id} found')
             continue
         burst_infos.append(get_burst_infos([matching_version[len(matching_version) // 2]], Path.cwd())[0])
         versions.append(version.id)
@@ -146,8 +155,9 @@ def identify_changing_versions(workdir):
         extract_support_folder(slc_path, workdir)
     create_diffs(workdir)
     has_changes = get_changes(workdir)
-    print('Files with changes:')
-    [print(file) for file in has_changes]
+    logging.info('Files with changes:')
+    for file in has_changes:
+        logging.info(file)
 
 
 def download_representative_support(workdir):
@@ -175,7 +185,7 @@ def main():
     elif args.workflow == 'find_representative_bursts':
         bursts, versions = find_representative_bursts(important_only=True)
         for burst, version in zip(bursts, versions):
-            print(f'Found burst: {burst.granule} with version {version}')
+            logging.info(f'Found burst: {burst.granule} with version {version}')
 
 
 if __name__ == '__main__':

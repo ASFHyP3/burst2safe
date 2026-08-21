@@ -3,6 +3,7 @@
 
 import argparse
 import json
+import logging
 from datetime import datetime
 from pathlib import Path
 from typing import cast
@@ -10,6 +11,9 @@ from typing import cast
 from burst2safe import utils
 from burst2safe.burst_id import calculate_burstid
 from burst2safe.safe import Safe
+
+
+logger = logging.getLogger(__name__)
 
 
 def burst_info_from_local(
@@ -130,15 +134,15 @@ def local2safe(
     work_dir = utils.optional_wd(work_dir)
 
     burst_infos = load_burst_infos(slc_dict)
-    print(f'Found {len(burst_infos)} burst(s).')
+    logger.info(f'Found {len(burst_infos)} burst(s).')
 
-    print('Check burst group validity...')
+    logger.info('Check burst group validity...')
     Safe.check_group_validity(burst_infos)
-    print('Creating SAFE...')
+    logger.info('Creating SAFE...')
 
     safe = Safe(burst_infos, all_anns, work_dir)
     safe_path = safe.create_safe()
-    print('SAFE created!')
+    logger.info('SAFE created!')
 
     if not keep_files:
         safe.cleanup()
@@ -160,7 +164,23 @@ def main():
     )
     parser.add_argument('--all_anns', action='store_true', help='Include all annotations')
     parser.add_argument('--work_dir', type=Path, help='The directory to store temporary files')
+    parser.add_argument(
+        '-v', '--verbose', action='count', default=0, help='Increase the logging verbosity. Can be used multiple times.'
+    )
     args = parser.parse_args()
+
+    logging.basicConfig(
+        format='%(asctime)s - %(levelname)s - %(message)s', datefmt='%m/%d/%Y %I:%M:%S %p', level=logging.INFO
+    )
+
+    if args.verbose > 0:
+        logger.setLevel(logging.DEBUG)
+    if args.verbose < 2:
+        import asf_search
+
+        asf_logger = logging.getLogger(asf_search.__name__)
+        asf_logger.disabled = True
+
     slc_tree = json.loads(args.json_tree_path.read_text())
 
     local2safe(

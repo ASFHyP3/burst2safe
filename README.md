@@ -1,4 +1,6 @@
 # burst2safe
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.14538103.svg)](https://doi.org/10.5281/zenodo.14538103)
+
 Utility for converting ASF-derived Sentinel-1 burst SLC products to the ESA SAFE format.
 
 ## Processor Compatibility
@@ -142,7 +144,12 @@ A full accounting of omitted datasets and differing fields can be found below:
 ### IPF Version Compatibility
 At this time, we are not aware of any compatibility issues with older Sentinel-1 Instrument Processing Facility (IPF) versions. However, if you do encounter any incompatibilities [please open an issue](https://github.com/ASFHyP3/burst2safe/issues/new), so we can fix it!
 
-## Developer Setup
+## Developers
+
+This section is only for developers. Normal users can skip this section.
+
+### Developer Setup
+
 1. Ensure that conda is installed on your system (we recommend using [mambaforge](https://github.com/conda-forge/miniforge#mambaforge) to reduce setup times).
 2. Download a local version of the `burst2safe` repository (`git clone https://github.com/ASFHyP3/burst2safe.git`)
 3. In the base directory for this project call `mamba env create -f environment.yml` to create your Python environment, then activate it (`mamba activate burst2safe`)
@@ -156,6 +163,42 @@ mamba env create -f environment.yml
 mamba activate burst2safe
 python -m pip install -e .
 ```
+
+### Adding Support for New IPF Versions
+
+Follow the steps below to add support for new [IPF versions](https://sar-mpc.eu/processor/ipf/).
+
+You will need to use the [`identify_ipf_differences`](./tests/etc/identify_ipf_differences.py) script.
+You may want to read the script to understand how it works.
+
+First, identify which IPF versions are "important",
+i.e. result in a different SAFE structure compared with the previous version:
+
+1. Follow [Developer Setup](#developer-setup).
+1. Add the new IPF versions to the `VERSIONS` list
+   defined globally in the [`identify_ipf_differences`](./tests/etc/identify_ipf_differences.py) script.
+   Specify `False` for the `important` attribute for each new `Version` object.
+1. To help the script run faster, you probably want to comment out all of the older versions,
+   except for the most recent older version (the version immediately before the new versions).
+   This is because the command that you're about to run
+   works by comparing each version to the previous version to determine if it changes the SAFE structure.
+1. From within the activated mamba environment, run:
+   ```
+   python tests/etc/identify_ipf_differences.py identify_changing_versions
+   ```
+   This command downloads some large files and takes awhile to run.
+   When it finishes, it should print which versions resulted in differences.
+   You should go back to the `VERSIONS` list
+   and change the `important` attribute for those versions to `True`.
+1. Finally, uncomment the older versions and then commit the changes to add the new versions.
+
+If there were no new "important" versions, you're done.
+Otherwise, see https://github.com/ASFHyP3/burst2safe/issues/244 for a sketch of the steps for adding new important versions,
+and then update this README section with the complete steps when you're done.
+
+## Citation
+
+If you use `burst2safe` in your research, please cite it. Use the "Cite this repository" button on the repository homepage to get an APA or BibTeX formatted citation of the `burst2safe` project (all versions). To cite a specific version, or for other formats, please visit the [Zenodo record](https://doi.org/10.5281/zenodo.14538103).
 
 ## License
 `burst2safe` is licensed under the BSD 2-Clause License. See the LICENSE file for more details.
