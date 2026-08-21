@@ -6,6 +6,10 @@ on:
     branches:
       - main
 
+permissions:
+  contents: read
+  artifact-metadata: write
+
 jobs:
   pytest-golden-develop:
     runs-on: ubuntu-latest
