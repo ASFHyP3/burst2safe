@@ -17,6 +17,6 @@ jobs:
         uses: vuillaut/contrib-checker@v1
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
-          mode: warn  # or 'fail' to make the workflow fail when contributors are missing
+          mode: fail
           ignore_emails: "dependabot[bot]@users.noreply.github.com"
           ignore_logins: "dependabot[bot],github-actions[bot]"

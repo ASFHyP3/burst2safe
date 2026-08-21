@@ -24,7 +24,7 @@ authors:
   - family-names: Herrmann
     given-names: Jake
     alias: jtherrmann
-  - family-names: Angrita
+  - family-names: Angarita
     given-names: Mario
     orcid: https://orcid.org/0000-0001-7455-2455
     alias: mfangaritav
@@ -48,3 +48,9 @@ authors:
     given-names: William
     orcid: https://orcid.org/0009-0003-8206-5982
     alias: williamh890
+  - family-names: Burris
+    given-names: Kaleb
+    alias: kalebvonburris
+  - family-names: Li
+    given-names: James
+    alias: ltianyi992
