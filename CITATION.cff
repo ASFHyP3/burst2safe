@@ -1,0 +1,56 @@
+cff-version: 1.2.0
+message: If you use this software, please cite it as below.
+title: burst2safe
+abstract: A package for converting ASF-derived Sentinel-1 burst SLC products to the ESA SAFE format.
+doi: 10.5281/zenodo.14538103
+type: software
+license: BSD-3-Clause
+repository-code: https://github.com/ASFHyP3/burst2safe
+keywords:
+  - SAR
+  - Synthetic Aperture Radar
+  - Sentinel-1
+  - SAFE
+  - burst
+  - NASA
+  - Alaska Satellite Facility
+  - ASF
+  - remote sensing
+authors:
+  - family-names: Williams
+    given-names: Forrest
+    orcid: https://orcid.org/0000-0001-8721-6020
+    alias: forrestfwilliams
+  - family-names: Herrmann
+    given-names: Jake
+    alias: jtherrmann
+  - family-names: Angarita
+    given-names: Mario
+    orcid: https://orcid.org/0000-0001-7455-2455
+    alias: mfangaritav
+  - family-names: Johnston
+    given-names: Andrew
+    alias: asjohnston-asf
+  - family-names: Player
+    given-names: Andrew
+    orcid: https://orcid.org/0009-0008-9736-7314
+    alias: AndrewPlayer3
+  - family-names: Kennedy
+    given-names: Joseph
+    name-particle: H
+    orcid: https://orcid.org/0000-0002-9348-693X
+    alias: jhkennedy
+  - family-names: Smale
+    given-names: Jacquelyn
+    orcid: https://orcid.org/0000-0002-2749-5010
+    alias: jacquelynsmale
+  - family-names: Horn
+    given-names: William
+    orcid: https://orcid.org/0009-0003-8206-5982
+    alias: williamh890
+  - family-names: Burris
+    given-names: Kaleb
+    alias: kalebvonburris
+  - family-names: Li
+    given-names: James
+    alias: ltianyi992
