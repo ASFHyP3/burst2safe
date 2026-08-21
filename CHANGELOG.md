@@ -10,6 +10,9 @@ and uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ### Added
 
+- A `citation.cff` file to provide citation metadata for this guide.
+- A GitHub Action workflow to validate changes to the `citation.cff` file.
+- Add Zenodo "project" DOI to README that will always resolve to the latest version on Zenodo.
 - `--vebose`/`-v` argument to `burst2safe`, `burst2stack`, and `local2safe` to enable and increment logging levels. A verbosity of 0 disables logging within `asf_search`, 1 enables `DEBUG` in the used CLI tool, and 2 additionally enables `asf_search`'s logging.
 
 ### Changed
@@ -37,7 +40,7 @@ and uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ### Changed
 
-- Updated github actions to use ASF's organization GitHub secrets.
+- Updated GitHub actions to use ASF's organization GitHub secrets.
 
 ## [2.0.0]
 
